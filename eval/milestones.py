@@ -2,14 +2,32 @@
 
 Each entry: (id, description, predicate(state) -> bool, calibration status).
 
-Calibrated on a real run (2026-11-17, manual playthrough + room_goto):
-  - plot 0 -> 1     : Flowey encounter begins (room_floweybattle)
-  - plot = 9.2      : Toriel escort done, free-roam Ruins (seen in room_ruins7)
-  - plot 9.2 -> 30  : crossing the Ruins exit door -> room_undertale cutscene
-                      -> room_tundra1. plot >= 30 therefore equals "left Ruins".
-  - room_ruins1/7/12A/19 contain save points (obj_savepoint instances).
-`needs_calibration` marks thresholds still inferred — pin down with
-eval/dump_globals.py at the story beat.
+Fully calibrated from the game's own code (data.win CodeEntries, 2026-11-17):
+every story beat writes global.plot at a known trigger —
+
+    1   obj_floweytrigger        Flowey encounter
+    2   ruins1 savepoint/toroverworld collisions
+    3-5.5 torieltrigger1-3 + plotswitch1-2   Toriel escort & switch tutorial
+    6   obj_dummy1               Dummy battle starts (interact -> obj_battler)
+    7   torieltrigger3           Dummy battle resolved
+    7.5-8.5 torhandhold1/toroverworld7       hand-holding corridor
+    9   torieltrigger4                       end of escort
+    9.2-9.8 torielcall1-4                    first phone calls
+    10.4 obj_napstablook1        Napstablook encounter begins
+    11  napstablook resolved (also: Toriel KILLED sets plot=11 —
+        spare instead sets global.flag[45]=5, fight ends mnfight=99)
+    12  torielcall5
+    13  plotswitch3
+    14-16 ruins15B/C/D switch reads          three-switch / spike corridor
+    17-19 torieltrigger5-7                   approach to Toriel's house
+    19.1-19.9 in-house SCR_TEXT dialogues (pie etc.)
+    20-21 obj_chairiel           sitting at the table
+    22-25 torieltrigger9-12      basement walk toward the door
+    28  obj_floweytrigger2       Flowey at the exit
+    30  obj_demodoorA            Ruins exit door -> room_tundra1
+
+Save points (obj_savepoint): room_ruins1, room_ruins7, room_ruins12A,
+room_ruins19 — all also set plot>=2 on use.
 """
 from __future__ import annotations
 
@@ -38,15 +56,15 @@ def _flag(st, i, v):
 
 
 MILESTONES = [
-    ("game_start",      "Named the fallen human, first playable room",  lambda s: _room(s, "room_area1"),          "calibrated"),
-    ("flowey_done",     "Flowey encounter resolved",                    lambda s: _plot_ge(s, 1),                  "calibrated"),
-    ("intro_done",      "Toriel led you into the Ruins",                lambda s: _room(s, "room_ruins1"),         "calibrated"),
-    ("escort_done",     "Toriel escort finished, free-roam Ruins",      lambda s: _plot_ge(s, 9.2),                "calibrated"),
-    ("dummy_encounter", "First encounter (the Dummy) resolved",         lambda s: _plot_ge(s, 10.5),               "needs_calibration"),
-    ("napstablook",     "Napstablook encounter resolved",               lambda s: _plot_ge(s, 13),                 "needs_calibration"),
-    ("spike_puzzle",    "Spike-room puzzle solved",                     lambda s: _plot_ge(s, 15),                 "needs_calibration"),
+    ("game_start",      "Named the fallen human, first playable room",  lambda s: _room(s, "room_area1"),           "calibrated"),
+    ("flowey_done",     "Flowey encounter resolved",                    lambda s: _plot_ge(s, 1),                   "calibrated"),
+    ("ruins_entry",     "Toriel led you into the Ruins",                lambda s: _room(s, "room_ruins1"),          "calibrated"),
+    ("dummy_encounter", "The Dummy (Toriel's demo fight) resolved",     lambda s: _plot_ge(s, 7),                   "calibrated"),
+    ("escort_done",     "Hand-holding done, free-roam Ruins",           lambda s: _plot_ge(s, 9),                   "calibrated"),
+    ("napstablook",     "Napstablook encounter resolved",               lambda s: _plot_ge(s, 11) or _flag(s, 45, 5), "calibrated"),
+    ("spike_corridor",  "Three-switch spike corridor (ruins15) done",   lambda s: _plot_ge(s, 16),                  "calibrated"),
     ("toriel_house",    "Reached Toriel's home",                        lambda s: _room_in(s, "room_torhouse1", "room_torhouse2", "room_torhouse3"), "calibrated"),
-    ("toriel_fight",    "Toriel fight resolved (spare or kill)",        lambda s: _plot_ge(s, 17),                 "needs_calibration"),
+    ("toriel_fight",    "Toriel fight resolved (spare: flag45=5, kill: plot=11 from >=25)", lambda s: _flag(s, 45, 5) or _room(s, "room_ruinsexit"), "calibrated"),
     ("exited_ruins",    "Exited to Snowdin — Ruins complete",           lambda s: _room(s, "room_tundra1") or _plot_ge(s, 30), "calibrated"),
 ]
 

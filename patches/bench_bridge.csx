@@ -36,92 +36,104 @@ const string stepGml = @"
 if (!variable_global_exists(""bench_seq"")) { global.bench_seq = -1; global.bench_frame = 0; }
 global.bench_frame += 1;
 
-// apply pending command
-if (file_exists(""bench_cmd.json""))
+// apply pending command (flat text: first line seq N, then key 0|1)
+if (file_exists(""bench_cmd.txt""))
 {
-    var cf = file_text_open_read(""bench_cmd.json"");
-    var cjson = """";
-    while (!file_text_eof(cf)) { cjson += file_text_read_string(cf); file_text_readln(cf); }
-    file_text_close(cf);
-    var cmd = json_decode(cjson);
-    if (ds_exists(cmd, ds_type_map))
+    var cf = file_text_open_read(""bench_cmd.txt"");
+    var hdr = file_text_read_string(cf); file_text_readln(cf);
+    var seq = real(string_copy(hdr, 5, 12));
+    if (seq > global.bench_seq)
     {
-        var seq = cmd[? ""seq""];
-        if (seq > global.bench_seq)
+        global.bench_seq = seq;
+        while (!file_text_eof(cf))
         {
-            global.bench_seq = seq;
-            var keys = cmd[? ""keys""];
-            var knames = ds_list_create();
-            // order must match env/undertale_bench/keys.py
-            ds_list_add(knames, ""left"", ""right"", ""up"", ""down"", ""z"", ""x"", ""c"", ""enter"", ""shift"", ""ctrl"");
-            var vks = ds_list_create();
-            ds_list_add(vks, vk_left, vk_right, vk_up, vk_down, ord(""Z""), ord(""X""), ord(""C""), vk_enter, vk_shift, vk_control);
-            var i;
-            for (i = 0; i < ds_list_size(knames); i++)
+            var line = file_text_read_string(cf); file_text_readln(cf);
+            var sp = string_pos("" "", line);
+            if (sp > 0)
             {
-                var want = 0;
-                var kname = knames[| i];
-                if (ds_map_exists(keys, kname)) want = keys[? kname];
-                var vk = vks[| i];
-                var have = keyboard_check(vk);
-                if (want && !have) keyboard_key_press(vk);
-                if (!want && have) keyboard_key_release(vk);
+                var k = string_copy(line, 1, sp - 1);
+                var v = (string_copy(line, sp + 1, 4) == ""1"");
+                var vk = -1;
+                // names must match env/undertale_bench/keys.py
+                if (k == ""left"") vk = vk_left;
+                if (k == ""right"") vk = vk_right;
+                if (k == ""up"") vk = vk_up;
+                if (k == ""down"") vk = vk_down;
+                if (k == ""z"") vk = ord(""Z"");
+                if (k == ""x"") vk = ord(""X"");
+                if (k == ""c"") vk = ord(""C"");
+                if (k == ""enter"") vk = vk_enter;
+                if (k == ""shift"") vk = vk_shift;
+                if (k == ""ctrl"") vk = vk_control;
+                if (vk != -1)
+                {
+                    if (v && !keyboard_check(vk)) keyboard_key_press(vk);
+                    if (!v && keyboard_check(vk)) keyboard_key_release(vk);
+                }
             }
-            ds_list_destroy(knames);
-            ds_list_destroy(vks);
-            var af = file_text_open_write(""bench_ack.txt"");
-            file_text_write_string(af, string(seq) + "" "" + string(global.bench_frame));
-            file_text_close(af);
         }
-        ds_map_destroy(cmd);
+        var af = file_text_open_write(""bench_ack.txt"");
+        file_text_write_string(af, string(seq) + "" "" + string(global.bench_frame));
+        file_text_close(af);
     }
+    file_text_close(cf);
 }
 
-// export state
-var m = ds_map_create();
-m[? ""frame""] = global.bench_frame;
-m[? ""room""] = room;
-m[? ""room_name""] = room_get_name(room);
+// export state - JSON built by hand (no ds_map/json_encode: not portable)
+var q = chr(34);
+var bs = chr(92);
+var s = ""{"";
+s += q + ""frame"" + q + "":"" + string(global.bench_frame);
+s += "","" + q + ""room"" + q + "":"" + string(room);
+s += "","" + q + ""room_name"" + q + "":"" + q + room_get_name(room) + q;
 var mc = asset_get_index(""obj_mainchara"");
-if (mc != -1 && instance_exists(mc)) { m[? ""px""] = mc.x; m[? ""py""] = mc.y; }
-if (variable_global_exists(""hp"")) m[? ""hp""] = global.hp;
-if (variable_global_exists(""maxhp"")) m[? ""maxhp""] = global.maxhp;
-if (variable_global_exists(""lv"")) m[? ""lv""] = global.lv;
-if (variable_global_exists(""exp"")) m[? ""exp""] = global.exp;
-if (variable_global_exists(""gold"")) m[? ""gold""] = global.gold;
-if (variable_global_exists(""plot"")) m[? ""plot""] = global.plot;
-if (variable_global_exists(""battlegroup"")) m[? ""battlegroup""] = global.battlegroup;
-if (variable_global_exists(""mercymod"")) m[? ""mercymod""] = global.mercymod;
-if (variable_global_exists(""myfight"")) m[? ""myfight""] = global.myfight;
-if (variable_global_exists(""battlephase"")) m[? ""battlephase""] = global.battlephase;
-if (variable_global_exists(""at"")) m[? ""at""] = global.at;
-if (variable_global_exists(""df"")) m[? ""df""] = global.df;
-if (variable_global_exists(""kills"")) m[? ""kills""] = global.kills;
+if (mc != -1 && instance_exists(mc)) { s += "","" + q + ""px"" + q + "":"" + string(mc.x) + "","" + q + ""py"" + q + "":"" + string(mc.y); }
+if (variable_global_exists(""hp"")) s += "","" + q + ""hp"" + q + "":"" + string(global.hp);
+if (variable_global_exists(""maxhp"")) s += "","" + q + ""maxhp"" + q + "":"" + string(global.maxhp);
+if (variable_global_exists(""lv"")) s += "","" + q + ""lv"" + q + "":"" + string(global.lv);
+if (variable_global_exists(""exp"")) s += "","" + q + ""exp"" + q + "":"" + string(global.exp);
+if (variable_global_exists(""gold"")) s += "","" + q + ""gold"" + q + "":"" + string(global.gold);
+if (variable_global_exists(""plot"")) s += "","" + q + ""plot"" + q + "":"" + string(global.plot);
+if (variable_global_exists(""battlegroup"")) s += "","" + q + ""battlegroup"" + q + "":"" + string(global.battlegroup);
+if (variable_global_exists(""mercymod"")) s += "","" + q + ""mercymod"" + q + "":"" + string(global.mercymod);
+if (variable_global_exists(""myfight"")) s += "","" + q + ""myfight"" + q + "":"" + string(global.myfight);
+if (variable_global_exists(""battlephase"")) s += "","" + q + ""battlephase"" + q + "":"" + string(global.battlephase);
+if (variable_global_exists(""at"")) s += "","" + q + ""at"" + q + "":"" + string(global.at);
+if (variable_global_exists(""df"")) s += "","" + q + ""df"" + q + "":"" + string(global.df);
+if (variable_global_exists(""kills"")) s += "","" + q + ""kills"" + q + "":"" + string(global.kills);
 if (variable_global_exists(""msg""))
 {
     var msg = """";
     var mi;
-    var msglen = 0;
-    msglen = array_length_1d(global.msg);
+    var msglen = array_length_1d(global.msg);
     if (msglen > 20) msglen = 20;
     for (mi = 0; mi < msglen; mi++) { if (is_string(global.msg[mi])) msg += global.msg[mi] + "" ""; }
-    m[? ""msg""] = msg;
+    msg = string_replace_all(msg, bs, bs + bs);
+    msg = string_replace_all(msg, q, bs + q);
+    msg = string_replace_all(msg, ""#"", "" "");
+    s += "","" + q + ""msg"" + q + "":"" + q + msg + q;
 }
 if (variable_global_exists(""flag""))
 {
-    var fl = ds_list_create();
+    var fs = """";
     var fi;
     var nflags = array_length_1d(global.flag);
     if (nflags > 512) nflags = 512;
-    for (fi = 0; fi < nflags; fi++) ds_list_add(fl, global.flag[fi]);
-    ds_map_add_list(m, ""flags"", fl);
+    for (fi = 0; fi < nflags; fi++)
+    {
+        var fv = global.flag[fi];
+        if (is_real(fv) || is_string(fv)) fs += string(fv);
+        fs += "","";
+    }
+    s += "","" + q + ""flags_csv"" + q + "":"" + q + fs + q;
 }
 var bc = asset_get_index(""obj_battlecontroller"");
 var wr = asset_get_index(""obj_writer"");
-m[? ""in_battle""] = (bc != -1 && instance_exists(bc));
-m[? ""dialogue""] = (wr != -1 && instance_exists(wr));
+s += "","" + q + ""in_battle"" + q + "":"" + string(bc != -1 && instance_exists(bc));
+s += "","" + q + ""dialogue"" + q + "":"" + string(wr != -1 && instance_exists(wr));
+s += ""}"";
 var sf = file_text_open_write(""bench_state.json"");
-file_text_write_string(sf, json_encode(m));
+file_text_write_string(sf, s);
 file_text_close(sf);
 ";
 

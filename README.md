@@ -26,7 +26,9 @@ docs/       DESIGN.md — architecture, metrics, related work
 2. Install Python 3.11+ and `pip install -r requirements.txt`.
 3. `scripts\fetch_utmt.ps1` — downloads UndertaleModTool CLI into `tools/`.
 4. `scripts\patch_datawin.ps1 -GameDir "C:\...\Steam\steamapps\common\Undertale"` — produces `data_bench.win` next to `data.win` (original untouched).
-5. Launch: `UNDERTALE.exe -game data_bench.win` (keep the window focused; files land in `%LOCALAPPDATA%\UNDERTALE\bench_*`).
+5. Launch: `UNDERTALE.exe -game data_bench.win` (files land in `%LOCALAPPDATA%\UNDERTALE\bench_*`).
+
+   Steam's `steam_api.dll` forces a restart through the Steam client when launched directly. Two options: rename `steam_api.dll` in the game dir (Undertale runs fine without it — this is what the eval scripts assume), or leave it and add `-game data_bench.win` in Steam → Properties → Launch Options and press Play (warns if your account is in use elsewhere).
 6. `python eval/run_eval.py --agent scripted` for a smoke run.
 
 ## Legal

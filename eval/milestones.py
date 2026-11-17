@@ -16,8 +16,14 @@ def _plot_ge(st, v):
 
 
 def _flag(st, i, v):
-    flags = st.get("flags") or []
-    return len(flags) > i and flags[i] == v
+    csv = st.get("flags_csv") or ""
+    parts = csv.rstrip(",").split(",")
+    if len(parts) <= i or not parts[i]:
+        return False
+    try:
+        return float(parts[i]) == v
+    except ValueError:
+        return parts[i] == v
 
 
 MILESTONES = [

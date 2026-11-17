@@ -4,7 +4,7 @@ GameMaker file functions are sandboxed to %LOCALAPPDATA%\\UNDERTALE\\, which
 doubles as the IPC directory:
 
   bench_state.json  game -> env   (rewritten every Step)
-  bench_cmd.json    env  -> game  (desired held-key set + seq)
+  bench_cmd.txt     env  -> game  (flat text: "seq N" then "key 0|1" per line)
   bench_ack.txt     game -> env   ("<seq> <frame>" once applied)
 """
 from __future__ import annotations
@@ -25,7 +25,7 @@ class BridgeIPC:
     def __init__(self, timeout: float = 30.0):
         d = sandbox_dir()
         self.state_path = d / "bench_state.json"
-        self.cmd_path = d / "bench_cmd.json"
+        self.cmd_path = d / "bench_cmd.txt"
         self.ack_path = d / "bench_ack.txt"
         self.timeout = timeout
         self._seq = 0
@@ -41,9 +41,11 @@ class BridgeIPC:
     # ----------------------------------------------------------- env -> game
     def send_keys(self, keys: dict[str, bool]) -> int:
         self._seq += 1
-        payload = {"seq": self._seq, "keys": keys}
+        from .keys import KEY_NAMES
+        lines = [f"seq {self._seq}"]
+        lines += [f"{k} {1 if keys.get(k) else 0}" for k in KEY_NAMES]
         tmp = self.cmd_path.with_suffix(".tmp")
-        tmp.write_text(json.dumps(payload))
+        tmp.write_text("\n".join(lines) + "\n")
         tmp.replace(self.cmd_path)
         return self._seq
 

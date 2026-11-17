@@ -19,10 +19,17 @@ GameMaker file functions are sandboxed to `%LOCALAPPDATA%\UNDERTALE\`, which dou
 | File | Direction | Contents |
 |---|---|---|
 | `bench_state.json` | game → env | one JSON object per step: frame, room, globals, flags, battle, msg |
-| `bench_cmd.json` | env → game | `{"seq": n, "keys": {"left": true, "z": false, ...}}` — desired held-key set |
+| `bench_cmd.txt` | env → game | flat text: `seq N` header, optional `goto <room>` debug line, then `key 0|1` per line — desired held-key set |
 | `bench_ack.txt` | game → env | last applied `seq` + frame it was applied at |
 
 The bridge (`obj_bench_bridge`, persistent, injected into the first room) runs in the Step event: poll command file, apply key diffs, write state. File-polling overhead is a few ms per frame — acceptable at 30 fps.
+
+Notes proven on the real game:
+
+- `global.bench_seq` persists inside the running game; the env recovers its counter from `bench_ack.txt` so reconnecting processes don't resend stale seqs.
+- `bench_cmd.txt` uses flat text and `bench_state.json` is hand-concatenated — this runtime rejects `ds_map`/`json_encode`.
+- `goto <room_name>` (`BridgeIPC.goto_room`) teleports the game for milestone testing without a playthrough; scripted events (e.g. Toriel's boss fight) still need real progression.
+- Input uses `keyboard_key_press`/`keyboard_key_release` — the same mechanism Undertale itself uses for joystick emulation. OS-level `SendInput`/`PostMessage` does not reach the game.
 
 ## Lite mode (process suspend)
 

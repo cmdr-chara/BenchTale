@@ -28,8 +28,10 @@ docs/       DESIGN.md — architecture, metrics, related work
 4. `scripts\patch_datawin.ps1 -GameDir "C:\...\Steam\steamapps\common\Undertale"` — produces `data_bench.win` next to `data.win` (original untouched).
 5. Launch: `UNDERTALE.exe -game data_bench.win` (files land in `%LOCALAPPDATA%\UNDERTALE\bench_*`).
 
+   Status: verified end-to-end on the real game — intro, naming, overworld movement, item pickup, choicer dialogues, a real random encounter (FIGHT timed hit + MERCY spare), and the Ruins exit door -> `room_tundra1`.
+
    Steam's `steam_api.dll` forces a restart through the Steam client when launched directly. Two options: rename `steam_api.dll` in the game dir (Undertale runs fine without it — this is what the eval scripts assume), or leave it and add `-game data_bench.win` in Steam → Properties → Launch Options and press Play (warns if your account is in use elsewhere).
-6. `python eval/run_eval.py --agent scripted` for a smoke run.
+6. `python eval/run_eval.py --agent scripted` for a smoke run. `python eval/play.py` is an interactive driver; `eval/playbook.py` (tap/hold/goto/shot helpers) is what real sessions use to drive the game. `ipc.goto_room("room_ruins7")` teleports for testing — scripted fights still need real progression.
 
 ## Legal
 

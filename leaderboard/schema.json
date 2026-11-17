@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "undertale-bench run result",
+  "type": "object",
+  "required": ["model", "mode", "score", "milestones_hit", "steps"],
+  "properties": {
+    "model": { "type": "string" },
+    "mode": { "enum": ["lite", "real-time"] },
+    "score": { "type": "number", "minimum": 0, "maximum": 1 },
+    "milestones_hit": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "milestone_frames": { "type": "object" },
+    "steps": { "type": "integer", "minimum": 1 },
+    "wall_clock_s": { "type": "number" },
+    "deaths": { "type": "integer", "minimum": 0 },
+    "tokens_used": { "type": "integer" },
+    "notes": { "type": "string" }
+  }
+}

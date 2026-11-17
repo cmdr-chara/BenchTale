@@ -53,6 +53,12 @@ if (file_exists(""bench_cmd.txt""))
             {
                 var k = string_copy(line, 1, sp - 1);
                 var v = (string_copy(line, sp + 1, 4) == ""1"");
+                if (k == ""goto"")
+                {
+                    var rn = string_copy(line, sp + 1, 64);
+                    var ridx = asset_get_index(rn);
+                    if (ridx != -1) room_goto(ridx);
+                }
                 var vk = -1;
                 // names must match env/undertale_bench/keys.py
                 if (k == ""left"") vk = vk_left;
@@ -131,6 +137,8 @@ var bc = asset_get_index(""obj_battlecontroller"");
 var wr = asset_get_index(""obj_writer"");
 s += "","" + q + ""in_battle"" + q + "":"" + string(bc != -1 && instance_exists(bc));
 s += "","" + q + ""dialogue"" + q + "":"" + string(wr != -1 && instance_exists(wr));
+s += "","" + q + ""dbg_zcheck"" + q + "":"" + string(keyboard_check(ord(""Z"")));
+s += "","" + q + ""dbg_zdirect"" + q + "":"" + string(keyboard_check_direct(ord(""Z"")));
 s += ""}"";
 var sf = file_text_open_write(""bench_state.json"");
 file_text_write_string(sf, s);

@@ -28,8 +28,15 @@ class BridgeIPC:
         self.cmd_path = d / "bench_cmd.txt"
         self.ack_path = d / "bench_ack.txt"
         self.timeout = timeout
-        self._seq = 0
+        self._seq = self._recover_seq()
         self._last_state_frame = -1
+
+    def _recover_seq(self) -> int:
+        """bench_seq persists in-game across processes — continue from last ack."""
+        try:
+            return int(self.ack_path.read_text().split()[0])
+        except Exception:
+            return 0
 
     def clear(self) -> None:
         for p in (self.state_path, self.cmd_path, self.ack_path):
@@ -39,15 +46,22 @@ class BridgeIPC:
                 pass
 
     # ----------------------------------------------------------- env -> game
-    def send_keys(self, keys: dict[str, bool]) -> int:
+    def send_keys(self, keys: dict[str, bool], goto: str | None = None) -> int:
         self._seq += 1
         from .keys import KEY_NAMES
         lines = [f"seq {self._seq}"]
+        if goto is not None:
+            lines.append(f"goto {goto}")
         lines += [f"{k} {1 if keys.get(k) else 0}" for k in KEY_NAMES]
         tmp = self.cmd_path.with_suffix(".tmp")
         tmp.write_text("\n".join(lines) + "\n")
         tmp.replace(self.cmd_path)
         return self._seq
+
+    def goto_room(self, room_name: str) -> int:
+        """Debug/testing helper: jump the game to a room (bench-only command)."""
+        seq = self.send_keys({}, goto=room_name)
+        return self.wait_ack(seq)
 
     def wait_ack(self, seq: int, timeout: float | None = None) -> int:
         """Block until the bridge reports it applied `seq`; returns the game frame."""

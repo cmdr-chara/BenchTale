@@ -36,6 +36,7 @@ def main() -> None:
 
     hit: set[str] = set()
     first_hit_frame: dict[str, int] = {}
+    first_hit_s: dict[str, float] = {}
     obs, _ = env.reset()
     t0 = time.time()
 
@@ -49,6 +50,7 @@ def main() -> None:
                 if m not in hit:
                     hit.add(m)
                     first_hit_frame[m] = st.get("frame", -1)
+                    first_hit_s[m] = round(time.time() - t0, 2)
                     print(f"[{st.get('frame')}] milestone: {m}")
 
             log.write(json.dumps({
@@ -64,6 +66,7 @@ def main() -> None:
         "wall_clock_s": round(time.time() - t0, 2),
         "milestones_hit": sorted(hit),
         "milestone_frames": first_hit_frame,
+        "milestone_seconds": first_hit_s,
         "score": len(hit) / len(MILESTONE_IDS),
     }
     (out / "result.json").write_text(json.dumps(result, indent=2))

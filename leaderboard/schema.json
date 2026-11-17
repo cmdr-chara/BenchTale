@@ -12,6 +12,7 @@
       "items": { "type": "string" }
     },
     "milestone_frames": { "type": "object" },
+    "milestone_seconds": { "type": "object" },
     "steps": { "type": "integer", "minimum": 1 },
     "wall_clock_s": { "type": "number" },
     "deaths": { "type": "integer", "minimum": 0 },

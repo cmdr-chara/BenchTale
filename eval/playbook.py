@@ -55,6 +55,16 @@ def shot(name):
     Image.fromarray(img).save(p)
     print('saved', p)
 
+_ev_seq = 0
+
+def events():
+    """Drain new bridge events since last call; prints and returns them."""
+    global _ev_seq
+    _ev_seq, evs = ipc.events_since(_ev_seq)
+    for e in evs:
+        print(e['frame'], e['type'], e['detail'])
+    return evs
+
 def brief(st=None):
     st = st or state()
     keep = {k: st.get(k) for k in ('frame','room','room_name','px','py','hp','plot','in_battle','dialogue','msg','battlegroup')}

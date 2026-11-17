@@ -36,6 +36,26 @@ const string stepGml = @"
 if (!variable_global_exists(""bench_seq"")) { global.bench_seq = -1; global.bench_frame = 0; }
 global.bench_frame += 1;
 
+// one-time init of watched values for the event stream
+if (!variable_global_exists(""bench_ev_init""))
+{
+    global.bench_ev_init = 1;
+    global.bench_eseq = 0;
+    global.bench_pv_room = -999;
+    global.bench_pv_hp = -999;
+    global.bench_pv_plot = -9999;
+    global.bench_pv_battle = -1;
+    global.bench_pv_bg = -999;
+    global.bench_pv_dlg = -1;
+    global.bench_pv_choice = -999;
+    global.bench_pv_choicer = -1;
+    var _i; for (_i = 0; _i < 8; _i++) global.bench_pv_item[_i] = -999;
+    global.bench_pv_exp = -999;
+    global.bench_pv_lv = -999;
+    global.bench_pv_gold = -999;
+    global.bench_pv_kills = -999;
+}
+
 // apply pending command (flat text: first line seq N, then key 0|1)
 if (file_exists(""bench_cmd.txt""))
 {
@@ -135,14 +155,151 @@ if (variable_global_exists(""flag""))
 }
 var bc = asset_get_index(""obj_battlecontroller"");
 var wr = asset_get_index(""obj_writer"");
-s += "","" + q + ""in_battle"" + q + "":"" + string(bc != -1 && instance_exists(bc));
-s += "","" + q + ""dialogue"" + q + "":"" + string(wr != -1 && instance_exists(wr));
+var di = asset_get_index(""obj_dialoguer"");
+var ch = asset_get_index(""obj_choicer"");
+var inbt = (bc != -1 && instance_exists(bc));
+var haswr = (wr != -1 && instance_exists(wr));
+var hasdi = (di != -1 && instance_exists(di));
+var hasch = (ch != -1 && instance_exists(ch));
+s += "","" + q + ""in_battle"" + q + "":"" + string(inbt);
+s += "","" + q + ""dialogue"" + q + "":"" + string(haswr || hasdi || hasch);
+s += "","" + q + ""choicer"" + q + "":"" + string(hasch);
+if (variable_global_exists(""choice"")) s += "","" + q + ""choice"" + q + "":"" + string(global.choice);
+if (variable_global_exists(""item""))
+{
+    var its = """";
+    var ii;
+    var nitems = 8;
+    for (ii = 0; ii < nitems; ii++) { its += string(global.item[ii]); its += "",""; }
+    s += "","" + q + ""items_csv"" + q + "":"" + q + its + q;
+}
 s += "","" + q + ""dbg_zcheck"" + q + "":"" + string(keyboard_check(ord(""Z"")));
 s += "","" + q + ""dbg_zdirect"" + q + "":"" + string(keyboard_check_direct(ord(""Z"")));
 s += ""}"";
 var sf = file_text_open_write(""bench_state.json"");
 file_text_write_string(sf, s);
 file_text_close(sf);
+
+// ---------------------------------------------------- event stream ----
+// every observable change becomes one line in bench_events.txt:
+// <eseq> <frame> <type> <detail>
+var ev = """";
+var nl = chr(10);
+
+if (room != global.bench_pv_room)
+{
+    global.bench_eseq += 1;
+    ev += string(global.bench_eseq) + "" "" + string(global.bench_frame) + "" room "" + room_get_name(room) + nl;
+    global.bench_pv_room = room;
+}
+
+if (variable_global_exists(""hp""))
+{
+    var dh = global.hp - global.bench_pv_hp;
+    if (global.bench_pv_hp != -999 && dh != 0)
+    {
+        global.bench_eseq += 1;
+        ev += string(global.bench_eseq) + "" "" + string(global.bench_frame) + "" hp "" + string(dh) + nl;
+    }
+    global.bench_pv_hp = global.hp;
+}
+
+if (inbt != global.bench_pv_battle)
+{
+    global.bench_eseq += 1;
+    ev += string(global.bench_eseq) + "" "" + string(global.bench_frame) + "" battle "" + string(inbt) + nl;
+    global.bench_pv_battle = inbt;
+}
+
+if (variable_global_exists(""battlegroup""))
+{
+    if (global.battlegroup != global.bench_pv_bg)
+    {
+        global.bench_eseq += 1;
+        ev += string(global.bench_eseq) + "" "" + string(global.bench_frame) + "" battlegroup "" + string(global.battlegroup) + nl;
+        global.bench_pv_bg = global.battlegroup;
+    }
+}
+
+var dlg = (haswr || hasdi || hasch);
+if (dlg != global.bench_pv_dlg)
+{
+    global.bench_eseq += 1;
+    ev += string(global.bench_eseq) + "" "" + string(global.bench_frame) + "" dialogue "" + string(dlg) + nl;
+    global.bench_pv_dlg = dlg;
+}
+
+if (hasch != global.bench_pv_choicer)
+{
+    global.bench_eseq += 1;
+    ev += string(global.bench_eseq) + "" "" + string(global.bench_frame) + "" choicer "" + string(hasch) + nl;
+    global.bench_pv_choicer = hasch;
+}
+
+if (variable_global_exists(""choice""))
+{
+    if (global.choice != global.bench_pv_choice)
+    {
+        global.bench_eseq += 1;
+        ev += string(global.bench_eseq) + "" "" + string(global.bench_frame) + "" choice "" + string(global.choice) + nl;
+        global.bench_pv_choice = global.choice;
+    }
+}
+
+if (variable_global_exists(""item""))
+{
+    var islot;
+    for (islot = 0; islot < 8; islot++)
+    {
+        if (global.item[islot] != global.bench_pv_item[islot])
+        {
+            if (global.bench_pv_item[islot] != -999)
+            {
+                global.bench_eseq += 1;
+                ev += string(global.bench_eseq) + "" "" + string(global.bench_frame) + "" item "" + string(islot) + "" "" + string(global.item[islot]) + nl;
+            }
+            global.bench_pv_item[islot] = global.item[islot];
+        }
+    }
+}
+
+if (variable_global_exists(""plot""))
+{
+    if (global.plot != global.bench_pv_plot)
+    {
+        global.bench_eseq += 1;
+        ev += string(global.bench_eseq) + "" "" + string(global.bench_frame) + "" plot "" + string(global.plot) + nl;
+        global.bench_pv_plot = global.plot;
+    }
+}
+
+if (variable_global_exists(""exp"")) { if (global.exp != global.bench_pv_exp) { global.bench_eseq += 1; ev += string(global.bench_eseq) + "" "" + string(global.bench_frame) + "" exp "" + string(global.exp) + nl; global.bench_pv_exp = global.exp; } }
+if (variable_global_exists(""lv"")) { if (global.lv != global.bench_pv_lv) { global.bench_eseq += 1; ev += string(global.bench_eseq) + "" "" + string(global.bench_frame) + "" lv "" + string(global.lv) + nl; global.bench_pv_lv = global.lv; } }
+if (variable_global_exists(""gold"")) { if (global.gold != global.bench_pv_gold) { global.bench_eseq += 1; ev += string(global.bench_eseq) + "" "" + string(global.bench_frame) + "" gold "" + string(global.gold) + nl; global.bench_pv_gold = global.gold; } }
+if (variable_global_exists(""kills"")) { if (global.kills != global.bench_pv_kills) { global.bench_eseq += 1; ev += string(global.bench_eseq) + "" "" + string(global.bench_frame) + "" kills "" + string(global.kills) + nl; global.bench_pv_kills = global.kills; } }
+
+// death = shattered-heart object or gameover screen
+var hd = asset_get_index(""obj_heartdefeated"");
+var go = asset_get_index(""obj_gameover"");
+var dead = ((hd != -1 && instance_exists(hd)) || (go != -1 && instance_exists(go)));
+if (dead && !variable_global_exists(""bench_dead"")) global.bench_dead = 0;
+if (dead && global.bench_dead == 0) { global.bench_eseq += 1; ev += string(global.bench_eseq) + "" "" + string(global.bench_frame) + "" death -"" + nl; global.bench_dead = 1; }
+if (!dead) global.bench_dead = 0;
+
+// savepoint interaction
+var sp1 = asset_get_index(""obj_savepoint"");
+var sp2 = asset_get_index(""obj_savepoint_fake"");
+var spinter = ((sp1 != -1 && instance_exists(sp1) && (sp1).myinteract > 0) || (sp2 != -1 && instance_exists(sp2) && (sp2).myinteract > 0));
+if (spinter && !variable_global_exists(""bench_sp"")) global.bench_sp = 0;
+if (spinter && global.bench_sp == 0) { global.bench_eseq += 1; ev += string(global.bench_eseq) + "" "" + string(global.bench_frame) + "" save -"" + nl; global.bench_sp = 1; }
+if (!spinter) global.bench_sp = 0;
+
+if (ev != """")
+{
+    var lf = file_text_open_append(""bench_events.txt"");
+    file_text_write_string(lf, ev);
+    file_text_close(lf);
+}
 ";
 
 var stepCode = obj.EventHandlerFor(EventType.Step, EventSubtypeStep.Step, Data);

@@ -16,6 +16,7 @@
     "steps": { "type": "integer", "minimum": 1 },
     "wall_clock_s": { "type": "number" },
     "deaths": { "type": "integer", "minimum": 0 },
+    "event_counts": { "type": "object" },
     "tokens_used": { "type": "integer" },
     "notes": { "type": "string" }
   }

@@ -6,6 +6,7 @@ doubles as the IPC directory:
   bench_state.json  game -> env   (rewritten every Step)
   bench_cmd.txt     env  -> game  (flat text: "seq N" then "key 0|1" per line)
   bench_ack.txt     game -> env   ("<seq> <frame>" once applied)
+  bench_events.txt  game -> env   (append-only "<eseq> <frame> <type> <detail>")
 """
 from __future__ import annotations
 
@@ -27,6 +28,7 @@ class BridgeIPC:
         self.state_path = d / "bench_state.json"
         self.cmd_path = d / "bench_cmd.txt"
         self.ack_path = d / "bench_ack.txt"
+        self.events_path = d / "bench_events.txt"
         self.timeout = timeout
         self._seq = self._recover_seq()
         self._last_state_frame = -1
@@ -39,7 +41,7 @@ class BridgeIPC:
             return 0
 
     def clear(self) -> None:
-        for p in (self.state_path, self.cmd_path, self.ack_path):
+        for p in (self.state_path, self.cmd_path, self.ack_path, self.events_path):
             try:
                 p.unlink()
             except FileNotFoundError:
@@ -112,3 +114,29 @@ class BridgeIPC:
         while st["frame"] < target and time.monotonic() < deadline:
             st = self.wait_new_state(timeout)
         return st
+
+    # ------------------------------------------------------------ events
+    def events_since(self, last_eseq: int) -> tuple[int, list[dict]]:
+        """Return (new_last_eseq, events) for every line with eseq > last_eseq.
+
+        Line format: "<eseq> <frame> <type> <detail...>".
+        """
+        out: list[dict] = []
+        try:
+            text = self.events_path.read_text()
+        except FileNotFoundError:
+            return last_eseq, out
+        for line in text.splitlines():
+            parts = line.strip().split(" ", 3)
+            if len(parts) < 3:
+                continue
+            try:
+                eseq, frame = int(parts[0]), int(parts[1])
+            except ValueError:
+                continue
+            if eseq <= last_eseq:
+                continue
+            out.append({"eseq": eseq, "frame": frame, "type": parts[2],
+                        "detail": parts[3] if len(parts) > 3 else ""})
+            last_eseq = max(last_eseq, eseq)
+        return last_eseq, out

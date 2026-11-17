@@ -21,8 +21,11 @@ GameMaker file functions are sandboxed to `%LOCALAPPDATA%\UNDERTALE\`, which dou
 | `bench_state.json` | game → env | one JSON object per step: frame, room, globals, flags, battle, msg |
 | `bench_cmd.txt` | env → game | flat text: `seq N` header, optional `goto <room>` debug line, then `key 0|1` per line — desired held-key set |
 | `bench_ack.txt` | game → env | last applied `seq` + frame it was applied at |
+| `bench_events.txt` | game → env | append-only event log: `<eseq> <frame> <type> <detail>` |
 
 The bridge (`obj_bench_bridge`, persistent, injected into the first room) runs in the Step event: poll command file, apply key diffs, write state. File-polling overhead is a few ms per frame — acceptable at 30 fps.
+
+Event types emitted by the bridge: `room`, `hp` (signed delta — damage/heal, hazards included), `battle`, `battlegroup`, `dialogue` (writer/dialoguer/choicer flag), `choicer`, `choice`, `item` (per-slot changes: pickups and food/item use), `plot`, `exp`, `lv`, `gold`, `kills`, `death` (`obj_heartdefeated`/`obj_gameover`), `save` (savepoint interaction). Frame-1 baseline entries document initial values. `BridgeIPC.events_since(eseq)` drains the log; `run_eval` folds events into `steps.jsonl` and counts deaths/event types into `result.json`.
 
 Notes proven on the real game:
 
@@ -45,7 +48,7 @@ A VLM with multi-second inference can never dodge bullet-hell patterns in real t
 
 Progress = fraction of Ruins milestones reached (engine-verified: room ids, `global.plot` thresholds, `global.flag` bits). Milestone constants live in `eval/milestones.py` and are explicitly marked `calibrated`/`needs_calibration` — early runs should dump raw `plot`/`flag` values at known story beats to pin the exact numbers down.
 
-Metrics per run: furthest milestone, wall-clock and frame counts per milestone, deaths/resets, total LLM tokens, mode.
+Metrics per run: furthest milestone, wall-clock and frame counts per milestone, deaths, per-type event counts (every interaction is recorded), total LLM tokens, mode.
 
 ## Related work / positioning
 

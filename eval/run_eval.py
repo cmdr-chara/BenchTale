@@ -37,6 +37,9 @@ def main() -> None:
     hit: set[str] = set()
     first_hit_frame: dict[str, int] = {}
     first_hit_s: dict[str, float] = {}
+    ev_seq = 0
+    deaths = 0
+    event_counts: dict[str, int] = {}
     obs, _ = env.reset()
     t0 = time.time()
 
@@ -53,11 +56,18 @@ def main() -> None:
                     first_hit_s[m] = round(time.time() - t0, 2)
                     print(f"[{st.get('frame')}] milestone: {m}")
 
+            ev_seq, evs = env.ipc.events_since(ev_seq)
+            for e in evs:
+                event_counts[e["type"]] = event_counts.get(e["type"], 0) + 1
+                if e["type"] == "death":
+                    deaths += 1
+
             log.write(json.dumps({
                 "step": i, "action": action,
                 "frame": st.get("frame"), "room": st.get("room_name"),
                 "plot": st.get("plot"), "hp": st.get("hp"),
                 "in_battle": st.get("in_battle"), "msg": (st.get("msg") or "")[:200],
+                "events": evs,
             }) + "\n")
 
     env.close()
@@ -67,6 +77,8 @@ def main() -> None:
         "milestones_hit": sorted(hit),
         "milestone_frames": first_hit_frame,
         "milestone_seconds": first_hit_s,
+        "deaths": deaths,
+        "event_counts": event_counts,
         "score": len(hit) / len(MILESTONE_IDS),
     }
     (out / "result.json").write_text(json.dumps(result, indent=2))

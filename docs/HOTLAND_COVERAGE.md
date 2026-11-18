@@ -66,3 +66,28 @@ All rooms below load and spawn objects correctly via `goto` (bridge alive in eac
 - Savepoints: need z press while overlapping; save wrote file9 @ savepoint1.
 - door_ruins13 objects appear in savepoint2, walkandbranch2, hotelfront_1,
   elevator_r3, core_center, core_branch — a back-route network worth mapping later.
+
+## New Home / Castle chain (verified live)
+- **castle_elevatorout**: post-CORE elevator + savepoint
+- **precastle**: lastruins vista, elevator, long east corridor
+- **castle_hook**: vertical transition
+- **castle_front**: savepoint
+- **lastruins_corridor**: obj_story_engager x1700 (the monster-story gauntlet)
+- **sanscorridor**: savepoint + obj_lastsans_trigger x820 — Sans judgement hall
+- **finalshoehorn**: savepoint + readable (home/lived-in reveal)
+- **coffins1/2**: coffin room(s), obj_coffin
+- **throneroom**: torielthrone + asgorethrone + obj_asgore_actor +
+  asgoremeet_event + door_ruins13
+- **prebarrier**: savepoint + asgore_prebarrier_event
+- **barrier**: obj_finalbarrier + barrierevent + Asgore — final boss room, event armed
+
+## Crash/stall notes (new)
+- core_freebattle's scripted bg60 event DEADLOCKED when re-entered after the
+  boot — game loop froze (state file stopped writing; process had to be killed).
+  Re-entry after mid-scene aborts is fragile; treat scripted-battle rooms as
+  one-shot unless freeme'd first.
+- file9 can be rewritten by scripted scenes into a room that deadlocks on
+  reload — keep a known-good file0 backup to restore file9 from.
+- Launching the game via `cmd /c start` silently fails on this box after the
+  restart; launch `./UNDERTALE.exe -game data_bench.win &` directly instead.
+- steam_api.dll error 126 on boot is benign (Steam running; game proceeds).

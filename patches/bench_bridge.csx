@@ -179,6 +179,50 @@ if (variable_global_exists(""item""))
     for (ii = 0; ii < nitems; ii++) { its += string(global.item[ii]); its += "",""; }
     s += "","" + q + ""items_csv"" + q + "":"" + q + its + q;
 }
+// soul + bullet + monster positions for dodge-aware agents
+var ho = asset_get_index(""obj_heart"");
+if (ho != -1 && instance_exists(ho)) { s += "","" + q + ""soul_x"" + q + "":"" + string(ho.x) + "","" + q + ""soul_y"" + q + "":"" + string(ho.y); }
+var bp = asset_get_index(""obj_asbulletparent"");
+if (bp != -1)
+{
+    var bn = instance_number(bp);
+    if (bn > 0)
+    {
+        var bcv = """";
+        var bi;
+        for (bi = 0; bi < bn; bi++)
+        {
+            var bo = instance_find(bp, bi);
+            bcv += string(bo.x) + ""|"" + string(bo.y) + ""|"";
+        }
+        s += "","" + q + ""bullets"" + q + "":"" + q + bcv + q;
+    }
+}
+var mp = asset_get_index(""obj_monsterparent"");
+if (mp != -1)
+{
+    var mn = instance_number(mp);
+    if (mn > 0)
+    {
+        var mcv = """";
+        var ki;
+        for (ki = 0; ki < mn; ki++)
+        {
+            var mo = instance_find(mp, ki);
+            var spx = 0;
+            if (variable_instance_exists(mo, ""spareable"") && mo.spareable) spx = 1;
+            mcv += object_get_name(mo.object_index) + ""|"" + string(mo.x) + ""|"" + string(mo.y) + ""|"" + string(spx) + "";"";
+        }
+        s += "","" + q + ""monsters"" + q + "":"" + q + mcv + q;
+    }
+}
+if (variable_global_exists(""monsterhp""))
+{
+    var mh = """";
+    var mi2;
+    for (mi2 = 0; mi2 < 3; mi2++) { mh += string(global.monsterhp[mi2]); mh += "",""; }
+    s += "","" + q + ""monsterhp"" + q + "":"" + q + mh + q;
+}
 s += "","" + q + ""dbg_zcheck"" + q + "":"" + string(keyboard_check(ord(""Z"")));
 s += "","" + q + ""dbg_zdirect"" + q + "":"" + string(keyboard_check_direct(ord(""Z"")));
 s += ""}"";

@@ -11,9 +11,30 @@ sys.path.insert(0, 'C:/Users/Administrator/repos/undertale-bench/env')
 sys.path.insert(0, 'C:/Users/Administrator/repos/undertale-bench/eval')
 from undertale_bench.ipc import BridgeIPC
 from undertale_bench.window import find_window, grab
-from milestones import reached, MILESTONE_IDS
+import os
+from milestones import reached as _reached_ruins, reached_optional as _reached_ruins_opt
 
-RUN = Path('C:/Users/Administrator/repos/undertale-bench/runs/devin_first')
+def _load_registries():
+    regs = [_reached_ruins, _reached_ruins_opt]
+    for mod_name in ('snowdin_milestones', 'waterfall_milestones', 'hotland_milestones', 'newhome_milestones'):
+        try:
+            mod = __import__(mod_name)
+            regs.append(mod.reached)
+            if hasattr(mod, 'reached_optional'):
+                regs.append(mod.reached_optional)
+        except ImportError:
+            pass
+    return regs
+
+_REGS = _load_registries()
+
+def reached(state):
+    out = []
+    for r in _REGS:
+        out.extend(r(state))
+    return out
+
+RUN = Path(os.environ.get('BENCH_RUN_DIR', 'C:/Users/Administrator/repos/undertale-bench/runs/devin_first'))
 RUN.mkdir(parents=True, exist_ok=True)
 LOG = RUN / 'steps.jsonl'
 SEQF = RUN / '.eseq'

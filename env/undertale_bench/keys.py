@@ -1,6 +1,6 @@
 """Key names shared with the GML bridge. Order/name must match patches/bench_bridge.csx."""
 
-KEY_NAMES = ["left", "right", "up", "down", "z", "x", "c", "enter", "shift", "ctrl"]
+KEY_NAMES = ["left", "right", "up", "down", "z", "x", "c", "enter", "shift", "ctrl", "f4"]
 
 # Windows virtual-key codes (for reference / OS-level fallback input)
 VK = {

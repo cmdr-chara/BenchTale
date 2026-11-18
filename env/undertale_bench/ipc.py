@@ -56,8 +56,16 @@ class BridgeIPC:
             lines.append(f"goto {goto}")
         lines += [f"{k} {1 if keys.get(k) else 0}" for k in KEY_NAMES]
         tmp = self.cmd_path.with_suffix(".tmp")
-        tmp.write_text("\n".join(lines) + "\n")
-        tmp.replace(self.cmd_path)
+        body = "\n".join(lines) + "\n"
+        for _ in range(200):
+            try:
+                tmp.write_text(body)
+                tmp.replace(self.cmd_path)
+                break
+            except (PermissionError, FileNotFoundError):
+                time.sleep(0.01)
+        else:
+            raise TimeoutError("bench_cmd.txt locked by game")
         return self._seq
 
     def goto_room(self, room_name: str) -> int:

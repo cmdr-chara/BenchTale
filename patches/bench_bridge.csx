@@ -60,8 +60,12 @@ if (!variable_global_exists(""bench_ev_init""))
 if (file_exists(""bench_cmd.txt""))
 {
     var cf = file_text_open_read(""bench_cmd.txt"");
+    if (cf != -1)
+    {
     var hdr = file_text_read_string(cf); file_text_readln(cf);
-    var seq = real(string_copy(hdr, 5, 12));
+    var seq = -1;
+    if (is_string(hdr) && string_length(hdr) >= 5)
+        seq = real(string_copy(hdr, 5, 12));
     if (seq > global.bench_seq)
     {
         global.bench_seq = seq;
@@ -89,6 +93,7 @@ if (file_exists(""bench_cmd.txt""))
                 if (k == ""x"") vk = ord(""X"");
                 if (k == ""c"") vk = ord(""C"");
                 if (k == ""enter"") vk = vk_enter;
+                if (k == ""f4"") vk = vk_f4;
                 if (k == ""shift"") vk = vk_shift;
                 if (k == ""ctrl"") vk = vk_control;
                 if (vk != -1)
@@ -103,6 +108,7 @@ if (file_exists(""bench_cmd.txt""))
         file_text_close(af);
     }
     file_text_close(cf);
+    }
 }
 
 // export state - JSON built by hand (no ds_map/json_encode: not portable)

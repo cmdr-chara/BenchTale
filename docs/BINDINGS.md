@@ -262,3 +262,41 @@ plot>=110 as the done predicate.
   controller waits on -> permanent stall (intr latch cleared but controller
   never resumes). Same class as the water8 view starvation. Rule: never
   freeme inside room_battle — kill the process instead.
+
+## Input model — REAL fix (verified live, fire3)
+`keyboard_key_press` sim registers ONLY on `keyboard_check_direct` on this runtime;
+`keyboard_check`/`keyboard_check_pressed` never see it (dbg_zcheck=0 vs zdirect=1 held).
+Everything that "advanced" before via sim-z was writer auto-advance.
+**Fix: real OS input.** `eval/oskey.py`: keybd_event via user32 + AttachThreadInput
+focus workaround (SetForegroundWindow works after AttachThreadInput+BringWindowToTop).
+Real keys register on BOTH check and direct -> menu edges, dialogue, movement all work.
+Game must be foreground (windowed is fine). First real z tap cleared the stuck
+Alphys status notification that survived ~200 sim taps.
+
+## Lab2 gate
+lab2's intro conveyor (obj_sideconveyorl 120,160 pushes west) + unfinished quiz scene
+lock control; z-sim couldn't advance it. Mettaton quiz (bg48) stalls at hp=1 in our
+hands — writer dependency issue; skipping via goto. Quiz is NOT plot-gating (122 persists).
+
+## Elevator hub (verified live)
+room_fire_elevator (214) interior: obj_elevatorpanel at (140,80) — interact needs
+FACE-UP + z. Flow: "Click..." -> "Please select a location." -> floor grid
+(text choicer: Left/Right Floor N + Cancel; cursor defaults to Cancel).
+Ride = select floor, then WALK SOUTH out to the destination spoke.
+Spokes: r1<->l1<->r2 (r2 has obj_heatsflamesman NPC at 240,120; his line ends
+"...n go home."). door_s (160,115)/(162,75) are the spoke entrances; door_t in
+elevator_l1 (220,230) exits SOUTH into prelab's north door -> elevator hub is a
+BACKTRACK shortcut, not forward progress.
+prelab exits: doorB west (fire2 side), doorC east -> lab1, doorA south (220,232),
+door_t north (elevator_l1), savepoint at (200,120).
+
+## Savepoint interact
+Star needs a z PRESS while overlapping (not just touch). Choicer -> z = writes
+file9 anchored to that room. file9 now = room_fire_savepoint1 @ plot 122.
+Savepoints also auto-set plot floor: save event bumped plot 54->137?? (verify:
+plot jumped to 137 on save in savepoint1 — the save writes current globals).
+
+## Hotland encounters
+obj_encount_fire1 arms random battles (bg51 = 3-monster group) in fire5's upper
+zone. LV1 dodge dies to them (~2 deaths); heal-assisted fight + flee worked.
+kills counter increments on real kills (seen 1->2).

@@ -220,3 +220,26 @@ plot>=110 as the done predicate.
   carrybird ride, goto around it.
 - intr=1 lingering in several waterfall rooms post-scene does not block goto.
 - undynefinal 136-138: boss rooms (not yet entered).
+
+## Input fix (repatch): movement chain + release latch
+- obj_time latches try_* off keyboard_check, which NEVER observes
+  keyboard_key_press sim on this runtime; pin try_up/down/left/right to
+  keyboard_check_direct each frame from the bridge (verified live: movement
+  returned immediately).
+- release must be unconditional: `if (keyboard_check(vk)) release` never ran
+  because check never sees sim -> latched keys held forever.
+- New admin `warp x y`: moves obj_mainchara directly (verified live).
+
+## Undyne boss (bg47, room_water_undynefinal -> room_battle), live
+- Room expects global.plot==121 at entry (obj_undynetrigger_boss2 Create);
+  door spawn is bottom-left markerA (20,640); wide solid at y=624 -> route
+  east to x~150 corridor, then north. Trigger_boss2 fires ~y=540: monologue
+  -> room_battle, battlegroup=47.
+- Green mode: spears tracked via blt (blt_whitespear/blt_bluespear/obj_rotspear
+  all match). Soul sits ~(320,240); block = press the direction of the
+  NEAREST incoming spear relative to center. Single-direction hold blocked
+  a full wave phase at LV1 losing only 5hp (loop latency ~0.3s is the leak).
+- Fight math at LV1: Undyne 1500hp; landed hits do ~6-15hp each and require
+  the attack-bar z on myfight==1; a legit kill needs dozens of clean phases.
+  Green-mode blocking is the workable mechanic; attack-bar timing is the
+  bottleneck for a real LV1 clear.

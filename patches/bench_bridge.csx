@@ -80,7 +80,23 @@ for (_hi = 0; _hi < 16; _hi++)
 {
     if (global.bench_hon[_hi] == 1 && global.bench_hvk[_hi] != -1)
     {
-        if (!keyboard_check(global.bench_hvk[_hi])) keyboard_key_press(global.bench_hvk[_hi]);
+        if (!keyboard_check_direct(global.bench_hvk[_hi])) keyboard_key_press(global.bench_hvk[_hi]);
+    }
+}
+
+// movement chain: obj_time latches try_* off keyboard_check, which never
+// observes keyboard_key_press sim on this runtime -- pin try_* to
+// keyboard_check_direct each frame so obj_time computes up/down/left/right
+// itself (mainchara moves via obj_time vars, verified in mainchara_dump.txt).
+var _tm = asset_get_index(""obj_time"");
+if (_tm != -1 && instance_exists(_tm))
+{
+    with (_tm)
+    {
+        try_up = keyboard_check_direct(vk_up);
+        try_down = keyboard_check_direct(vk_down);
+        try_left = keyboard_check_direct(vk_left);
+        try_right = keyboard_check_direct(vk_right);
     }
 }
 
@@ -143,6 +159,19 @@ if (file_exists(""bench_cmd.txt""))
                 {
                     var sv = real(string_copy(line, sp + 1, 8));
                     room_speed = sv; admin = k + "" "" + string(sv);
+                }
+                if (k == ""warp"")
+                {
+                    var wr = string_copy(line, sp + 1, 40);
+                    var spw = string_pos("" "", wr);
+                    var wx = real(string_copy(wr, 1, spw - 1));
+                    var wy = real(string_copy(wr, spw + 1, 20));
+                    var wmc = asset_get_index(""obj_mainchara"");
+                    if (wmc != -1 && instance_exists(wmc))
+                    {
+                        with (wmc) { x = wx; y = wy; }
+                        admin = k + "" "" + string(wx) + "","" + string(wy);
+                    }
                 }
                 if (k == ""freeme"")
                 {
@@ -218,7 +247,7 @@ if (file_exists(""bench_cmd.txt""))
                     else
                     {
                         if (hs != -1 && global.bench_hvk[hs] == vk) global.bench_hon[hs] = 0;
-                        if (keyboard_check(vk)) keyboard_key_release(vk);
+                        keyboard_key_release(vk);
                     }
                 }
             }

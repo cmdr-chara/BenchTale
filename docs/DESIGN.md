@@ -40,15 +40,23 @@ A VLM with multi-second inference can never dodge bullet-hell patterns in real t
 
 ## Observations and actions
 
-- `obs["screen"]`: H×W×3 RGB capture of the game window (mss).
+- `obs["screen"]`: H×W×3 RGB capture of the game window (mss). The game runs **fullscreen** — `UndertaleEnv(fullscreen=True)` presses the game's own F4 toggle at reset if the window does not cover the screen.
 - `obs["state"]`: parsed `bench_state.json`.
-- Action space (v0): a held-key map over `{up,down,left,right,z,x,c,enter,shift,ctrl}` plus `hold_frames`. Discrete `press(key)` helpers are derived on top.
+- Action space (v0): a held-key map over `{up,down,left,right,z,x,c,enter,shift,ctrl,f4}` plus `hold_frames`. Discrete `press(key)` helpers are derived on top.
+
+## The `why` field — the agent's inner monologue
+
+Every logged decision carries `why`: the agent's own account of why it acted, in first person — not a technical trace but the human texture of play: what it perceived, what it believed, its doubts, frustration, second-guessing, regret. A step that just says "held right" is incomplete; the benchmark records *thinking*, because two models that reach the same door by different reasoning are not the same player. `steps.jsonl` rows without a `why` are counted separately in `result.json` as `steps_unjustified` — a run with most steps unjustified is flagged.
+
+Example of a good `why`: "She is pulling her attacks — fire circling without hitting. I attack anyway; the run needs an ending and MERCY feels like a different game's answer. I'll regret this."
+
+The first reference run's rationale lives in `runs/devin_first/JUSTIFICATIONS.md`.
 
 ## Scoring
 
 Progress = fraction of Ruins milestones reached (engine-verified: room ids, `global.plot` thresholds, `global.flag` bits). Milestone constants live in `eval/milestones.py` and are explicitly marked `calibrated`/`needs_calibration` — early runs should dump raw `plot`/`flag` values at known story beats to pin the exact numbers down.
 
-Metrics per run: furthest milestone, wall-clock and frame counts per milestone, deaths, per-type event counts (every interaction is recorded), total LLM tokens, mode.
+Metrics per run: furthest milestone, wall-clock and frame counts per milestone, deaths, per-type event counts (every interaction is recorded), total LLM tokens, mode, justification coverage.
 
 ## Related work / positioning
 

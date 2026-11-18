@@ -32,10 +32,11 @@ from . import window as _window
 class UndertaleEnv(gym.Env):
     metadata = {"name": "undertale-bench", "fps": 30}
 
-    def __init__(self, mode: str = "lite", obs_screen: bool = True):
+    def __init__(self, mode: str = "lite", obs_screen: bool = True, fullscreen: bool = True):
         assert mode in ("lite", "real-time")
         self.mode = mode
         self.obs_screen = obs_screen
+        self.fullscreen = fullscreen
         self.ipc = BridgeIPC()
         self._hwnd = None
         self._pid = None
@@ -70,11 +71,32 @@ class UndertaleEnv(gym.Env):
             self._paused = False
 
     # --------------------------------------------------------------- gym API
+    def _is_fullscreen(self) -> bool:
+        import ctypes
+        sw = ctypes.windll.user32.GetSystemMetrics(0)
+        sh = ctypes.windll.user32.GetSystemMetrics(1)
+        return self._rect["width"] >= sw * 0.95 and self._rect["height"] >= sh * 0.9
+
+    def ensure_fullscreen(self) -> None:
+        """Undertale toggles fullscreen with F4; press it if the window is not covering the screen."""
+        if not self.fullscreen or not self._hwnd:
+            return
+        self._attach()
+        if self._is_fullscreen():
+            return
+        seq = self.ipc.send_keys({"f4": True})
+        self.ipc.wait_ack(seq)
+        self.ipc.wait_frames(10)
+        self.ipc.send_keys({"f4": False})
+        self.ipc.wait_frames(20)
+        self._attach()
+
     def reset(self, *, seed=None, options=None):
         super().reset(seed=seed)
         self._attach()
         self.ipc.clear()
         self.resume()
+        self.ensure_fullscreen()
         state = self.ipc.wait_state()
         self.pause()
         return self._obs(state), {"state": state}

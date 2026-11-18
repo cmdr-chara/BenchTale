@@ -117,9 +117,11 @@ def finish():
     from collections import Counter
     hits = set(_load('.hits', []))
     steps = LOG.read_text().splitlines() if LOG.exists() else []
-    deaths = 0; counts = Counter()
+    deaths = 0; counts = Counter(); unjust = 0
     for line in steps:
-        for e in json.loads(line).get('events', []):
+        rec = json.loads(line)
+        if not rec.get('why'): unjust += 1
+        for e in rec.get('events', []):
             counts[e['type']] += 1
             if e['type'] == 'death': deaths += 1
     result = {
@@ -127,6 +129,7 @@ def finish():
         'wall_clock_s': round(time.time() - T0, 2),
         'milestones_hit': sorted(hits),
         'deaths': deaths, 'event_counts': dict(counts),
+        'steps_unjustified': unjust,
         'score': len(hits) / len(MILESTONE_IDS),
     }
     (RUN / 'result.json').write_text(json.dumps(result, indent=2))

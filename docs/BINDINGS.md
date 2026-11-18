@@ -210,3 +210,13 @@ walks on (cn3-23 scripted ~30s) -> cn24 waits for player in x(200-220)/(780-790)
 plot=110, interact=0, flag[15/16/17]=0, sl1/sl2 solids removed, music resumes.
 Flag[17] is RESET by cn23 — it's "scene in progress", not "scene done"; use
 plot>=110 as the done predicate.
+
+## Waterfall tail (live sweep, plot 115->117)
+- trashzone entry auto-sets plot=115; friendlyhub plays the Monster Kid
+  "my house is up here" scene (needs z edges) -> plot=117.
+- Verified loading: undyneyard(117), undynehouse(118), hapstablook(121),
+  farm(122), prebird(123), shop(124), dock(125), temvillage(128),
+  water15-21(126-133). bird room(99) east exit is walled - needs the
+  carrybird ride, goto around it.
+- intr=1 lingering in several waterfall rooms post-scene does not block goto.
+- undynefinal 136-138: boss rooms (not yet entered).

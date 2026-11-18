@@ -113,3 +113,19 @@ calibration backbone for every region's milestones.
 - **XOXO**: X→O on step; O→green△ on re-step (resets fvic). obj_xoxocontroller1 = LEVER (not ball): pull with all-O → plot advance; else full reset. flag[63] += solved attempts.
 - **Kill counters**: flag[202]=Ruins(20), flag[203]=Snowdin(16), flag[200]=active counter id. Flags 222-225 are MUSIC, not kills.
 - **Waterfall reachable**: `room_water_prewaterfall` loads (goto).
+- **Papyrus re-fight softlock**: teleporting out of `room_tundra_garage` mid-capture then re-triggering the fight leaves the fight-#2 intro text unadvancable (no key works — z/x/enter all dead). Bail requires process restart or a non-battle goto.
+- **Admin commands** (`bench_cmd.txt` lines, all logged as `admin` events): `heal 1`, `item <id>`, `gold <n>`, `flag <i> <v>`. Calibration-only — a scored run using them is marked assisted.
+- **`keyboard_key_press` is OS-level**: IPC keys land in the *focused* window. With Chrome focused, z's type into its address bar. The UNDERTALE window must be foreground before any input-driven sequence.
+- **`room_water10`, `room_fire_lab3-5`, `room_castle_hallway`, `room_castle_basement` do not exist** in this data.win (goto returns -1 → stays in current room).
+
+## Coverage sweep (goto-verified, live)
+
+| Region | Rooms OK / total | Notes |
+|---|---|---|
+| Ruins | full playthrough done | `runs/devin_first/` — 10/10 milestones |
+| Snowdin | full spine + side rooms played | Papyrus fight mapped (capture loop, garage, softlock) |
+| Waterfall | 35/36 | prewaterfall, waterfall1-20 (no 10), nicecream, piano, statue, trashzone1-2, blookyard, bridgepuzz1, preundyne, undynefinal1-3 |
+| Hotland | 41/43 | fire1-10, prelab, lab1-2, elevators l/r 1-3, shootguy_1-5, preshootguy4, lasers1, walkandbranch1-2, restaurant, core1-5, core_bridge, core_warrior |
+| New Home/Castle | 5/7 | castle_front, elevatorout, precastle, finalshoehorn, barrier |
+| True Lab | 6/6 | hub, elevator, hall1, mirror, bedroom, power |
+| Endgame | 3/3 | sanscorridor, asrielroom, asrieltest |

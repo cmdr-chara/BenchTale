@@ -54,6 +54,18 @@ if (!variable_global_exists(""bench_ev_init""))
     global.bench_pv_lv = -999;
     global.bench_pv_gold = -999;
     global.bench_pv_kills = -999;
+    var _h; for (_h = 0; _h < 16; _h++) { global.bench_hvk[_h] = -1; global.bench_hon[_h] = 0; }
+}
+
+// held keys: keyboard_key_press only simulates one frame in GMS1.4,
+// so re-press every frame while a key is held down
+var _hi;
+for (_hi = 0; _hi < 16; _hi++)
+{
+    if (global.bench_hon[_hi] == 1 && global.bench_hvk[_hi] != -1)
+    {
+        if (!keyboard_check(global.bench_hvk[_hi])) keyboard_key_press(global.bench_hvk[_hi]);
+    }
 }
 
 // apply pending command (flat text: first line seq N, then key 0|1)
@@ -128,7 +140,30 @@ if (file_exists(""bench_cmd.txt""))
                     var mci = asset_get_index(""obj_mainchara"");
                     var had = (mci != -1 && instance_exists(mci));
                     if (!had && mci != -1) { instance_create(320, 240, mci); }
+                    // do NOT clear obj_mainchara.cutscene: cutscene controllers
+                    // rely on it to drive scripted view_yview animations; clearing
+                    // it makes mainchara reset the view every frame and stalls
+                    // e.g. obj_undyneencounter1 at cn==1.2 forever.
                     admin = k + "" had="" + string(had);
+                }
+                if (k == ""scan"")
+                {
+                    var seen = ""|"";
+                    var n = 0;
+                    var sf3 = file_text_open_append(""bench_events.txt"");
+                    with (all)
+                    {
+                        var on2 = object_get_name(object_index);
+                        var key = ""|"" + on2 + ""|"";
+                        if (string_pos(key, seen) == 0 && n < 80)
+                        {
+                            seen += on2 + ""|"";
+                            file_text_write_string(sf3, string(global.bench_frame) + "" obj "" + on2 + "" "" + string(x) + "" "" + string(y) + chr(10));
+                            n += 1;
+                        }
+                    }
+                    file_text_close(sf3);
+                    admin = k + "" n="" + string(n);
                 }
                 if (admin != """")
                 {
@@ -152,8 +187,23 @@ if (file_exists(""bench_cmd.txt""))
                 if (k == ""ctrl"") vk = vk_control;
                 if (vk != -1)
                 {
-                    if (v && !keyboard_check(vk)) keyboard_key_press(vk);
-                    if (!v && keyboard_check(vk)) keyboard_key_release(vk);
+                    var hs = -1;
+                    var hj;
+                    for (hj = 0; hj < 16; hj++)
+                    {
+                        if (global.bench_hvk[hj] == vk) hs = hj;
+                        if (hs == -1 && global.bench_hvk[hj] == -1) hs = hj;
+                    }
+                    if (v)
+                    {
+                        if (hs != -1) { global.bench_hvk[hs] = vk; global.bench_hon[hs] = 1; }
+                        if (!keyboard_check(vk)) keyboard_key_press(vk);
+                    }
+                    else
+                    {
+                        if (hs != -1 && global.bench_hvk[hs] == vk) global.bench_hon[hs] = 0;
+                        if (keyboard_check(vk)) keyboard_key_release(vk);
+                    }
                 }
             }
         }
@@ -174,6 +224,8 @@ s += "","" + q + ""room"" + q + "":"" + string(room);
 s += "","" + q + ""room_name"" + q + "":"" + q + room_get_name(room) + q;
 var mc = asset_get_index(""obj_mainchara"");
 if (mc != -1 && instance_exists(mc)) { s += "","" + q + ""px"" + q + "":"" + string(mc.x) + "","" + q + ""py"" + q + "":"" + string(mc.y); }
+if (mc != -1 && instance_exists(mc)) { with (mc) { global.bench_mv = movement; global.bench_cs = cutscene; } s += "","" + q + ""mv"" + q + "":"" + string(global.bench_mv) + "","" + q + ""cs"" + q + "":"" + string(global.bench_cs); }
+s += "","" + q + ""intr"" + q + "":"" + string(global.interact);
 if (variable_global_exists(""hp"")) s += "","" + q + ""hp"" + q + "":"" + string(global.hp);
 if (variable_global_exists(""maxhp"")) s += "","" + q + ""maxhp"" + q + "":"" + string(global.maxhp);
 if (variable_global_exists(""lv"")) s += "","" + q + ""lv"" + q + "":"" + string(global.lv);
@@ -184,6 +236,7 @@ if (variable_global_exists(""battlegroup"")) s += "","" + q + ""battlegroup"" + 
 if (variable_global_exists(""mercymod"")) s += "","" + q + ""mercymod"" + q + "":"" + string(global.mercymod);
 if (variable_global_exists(""myfight"")) s += "","" + q + ""myfight"" + q + "":"" + string(global.myfight);
 if (variable_global_exists(""battlephase"")) s += "","" + q + ""battlephase"" + q + "":"" + string(global.battlephase);
+if (variable_global_exists(""interact"")) s += "","" + q + ""interact"" + q + "":"" + string(global.interact);
 if (variable_global_exists(""at"")) s += "","" + q + ""at"" + q + "":"" + string(global.at);
 if (variable_global_exists(""df"")) s += "","" + q + ""df"" + q + "":"" + string(global.df);
 if (variable_global_exists(""kills"")) s += "","" + q + ""kills"" + q + "":"" + string(global.kills);
@@ -279,6 +332,12 @@ if (variable_global_exists(""monsterhp""))
 }
 s += "","" + q + ""dbg_zcheck"" + q + "":"" + string(keyboard_check(ord(""Z"")));
 s += "","" + q + ""dbg_zdirect"" + q + "":"" + string(keyboard_check_direct(ord(""Z"")));
+s += "","" + q + ""dbg_rcheck"" + q + "":"" + string(keyboard_check(vk_right));
+s += "","" + q + ""dbg_rdirect"" + q + "":"" + string(keyboard_check_direct(vk_right));
+var tm = asset_get_index(""obj_time"");
+if (tm != -1 && instance_exists(tm)) { with (tm) { global.bench_tr = right; global.bench_tryr = try_right; } s += "","" + q + ""tr"" + q + "":"" + string(global.bench_tr) + "","" + q + ""tryr"" + q + "":"" + string(global.bench_tryr); }
+var ue = asset_get_index(""obj_undyneencounter1"");
+if (ue != -1 && instance_exists(ue)) { with (ue) { global.bench_cn = cn; } s += "","" + q + ""cn"" + q + "":"" + string(global.bench_cn); }
 s += ""}"";
 var sf = file_text_open_write(""bench_state.json"");
 file_text_write_string(sf, s);
@@ -411,6 +470,11 @@ var stepCode = obj.EventHandlerFor(EventType.Step, EventSubtypeStep.Step, Data);
 var importGroup = new CodeImportGroup(Data) { MainThreadAction = MainThreadAction };
 importGroup.QueueAppend(stepCode, stepGml);
 importGroup.Import();
+
+// NOTE: do NOT patch obj_time keyboard_check_direct reads. On this runtime
+// keyboard_check_direct observes keyboard_key_press simulation while
+// keyboard_check does not -- the earlier suspicion was inverted; leave stock.
+
 
 // ------------------------------------------------- place in the first room ---
 UndertaleRoom room = Data.Rooms.ByName("room_introstory")

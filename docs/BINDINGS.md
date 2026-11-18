@@ -155,3 +155,38 @@ calibration backbone for every region's milestones.
 - **Respawn loop**: z/enter taps on room_gameover reload file9 → lands at its savepoint room (tundra_town for the current file0 copy) with save stats. Works reliably now that file9 exists.
 - **room_water8 has near-constant bg3 encounters** (Aaron/Woshua): a battle every few walk-holds east; flee via MERCY submenu doesn't reliably escape (flee chance + submenu vertical nav both fail often), so an LV1 walker ping-pongs at ~900-1140px forever. Admin `heal 1` mid-battle works but battles never end on flee alone — need real fight/dodge or a faster flee sequence. px resets to 0 on re-entry after some battles.
 - **Never `freeme` during a battle or battle transition** — it breaks the encounter state machine into a perpetual `room→fastbattle→hp -4→room` loop that survives without any script attached; only a process kill clears it.
+
+## freeme must NOT clear obj_mainchara.cutscene
+`cutscene` is set by cutscene controllers (e.g. obj_undyneencounter1) to take over
+`view_yview` animation. Clearing it makes obj_mainchara.Step_2 reset the view every
+frame, permanently stalling controllers that wait for view_yview thresholds
+(undyneencounter1 cn==1.2 → never cn==2 → interact stays 1 forever).
+This was the real cause of the multi-minute "water8 freeze".
+
+## Movement/input, verified
+- `keyboard_check_direct` DOES observe `keyboard_key_press` simulation on this
+  runtime; `keyboard_check` does NOT. Do not patch obj_time's direct reads.
+- water8 spawn (140,159): wall lip at x~147 for y<=160 — dip to y>=162 before
+  heading east. Same pattern probably applies elsewhere: always waypoint via
+  the corridor midline, not the spawn y.
+
+## Undyne chase sequence (water8 -> water9 -> spear minigame room 308+)
+- Entering room_water8 spawns obj_undyneencounter1 unconditionally (flag[17]
+  does not skip it); trigger at x>280. Sequence: cn 0.2 spear drop -> cn 4
+  interact release + flag[17]=1 -> cn 8-10 chase with obj_uspeargen ->
+  spear-dodge minigame room (~308) -> room_water9 chase2 -> knock into
+  trashzone (obj_wakeupchara scene, intr=1).
+- The minigame is LETHAL at LV1 for an agent without real dodging (hp 20 -> 0).
+  For flag-level coverage hop past it: goto room_water9/10 still re-triggers
+  chase controllers — goto room_water_savepoint1 (94) or later instead.
+
+## Waterfall room census
+61 rooms visited live (goto+scan), census in runs/water_sweep.json.
+Path order after water9: room_water_savepoint1(94) -> water11 -> ... ->
+undynefinal(134-136). Boss rooms: undynebridge(111)=encounter3,
+undynebridgeend(112)=encounter4, undynefinal(134) boss triggers,
+undynefinal3(136)=transheart intro. Interactions found: piano puzzle(102),
+statue(104), onionsan event(100), carrybird(99), shyren(101), dogroom
+rarependant(103), Mad Dummy trigger(115), napstablookdate(120),
+temvillage(128), glowshroom/darkness puzzles(127,129).
+room_water7_older(304) did not ack goto — likely dead/unused.

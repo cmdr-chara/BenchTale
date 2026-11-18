@@ -41,6 +41,12 @@ def shot(name):
     Image.fromarray(grab(w[1])).save(p)
     return p
 
+WHY = {'why': None}  # current justification, set via why() and read by _log
+
+def why(text):
+    """Attach a justification to every action logged until cleared (why(None))."""
+    WHY['why'] = text
+
 def _log(action, state):
     eseq = _eseq()
     eseq, evs = ipc.events_since(eseq)
@@ -53,6 +59,7 @@ def _log(action, state):
     (RUN / '.hits').write_text(json.dumps(sorted(hits)))
     LOG.open('a').write(json.dumps({
         'step_t': round(time.time() - T0, 2), 'action': {k: (sorted(v) if isinstance(v, (set, frozenset)) else v) for k, v in action.items()},
+        'why': WHY['why'],
         'frame': state.get('frame'), 'room': state.get('room_name'),
         'px': state.get('px'), 'py': state.get('py'),
         'plot': state.get('plot'), 'hp': state.get('hp'),
@@ -62,8 +69,9 @@ def _log(action, state):
     }) + '\n')
     return new
 
-def tap(keys, hold=4, settle=8):
+def tap(keys, hold=4, settle=8, why=None):
     if isinstance(keys, str): keys = [keys]
+    if why is not None: WHY['why'] = why
     s = ipc.send_keys({k: True for k in keys}); ipc.wait_ack(s)
     ipc.wait_frames(hold)
     s = ipc.send_keys({k: False for k in keys}); ipc.wait_ack(s)
@@ -72,8 +80,9 @@ def tap(keys, hold=4, settle=8):
     _log({'tap': keys, 'hold': hold}, state)
     return state
 
-def hold(keys, frames, tag=None):
+def hold(keys, frames, tag=None, why=None):
     if isinstance(keys, str): keys = [keys]
+    if why is not None: WHY['why'] = why
     s = ipc.send_keys({k: True for k in keys}); ipc.wait_ack(s)
     state = ipc.wait_frames(frames)
     _log({'hold': keys, 'frames': frames, 'tag': tag}, state)
@@ -83,8 +92,9 @@ def release():
     s = ipc.send_keys({}); ipc.wait_ack(s)
     return st()
 
-def walk(direction, frames, tag=None):
+def walk(direction, frames, tag=None, why=None):
     """Hold a direction, stop early if room changes."""
+    if why is not None: WHY['why'] = why
     r0 = st().get('room_name')
     s = ipc.send_keys({direction: True}); ipc.wait_ack(s)
     last = st()

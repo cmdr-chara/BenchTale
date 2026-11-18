@@ -91,3 +91,18 @@ All rooms below load and spawn objects correctly via `goto` (bridge alive in eac
 - Launching the game via `cmd /c start` silently fails on this box after the
   restart; launch `./UNDERTALE.exe -game data_bench.win &` directly instead.
 - steam_api.dll error 126 on boot is benign (Steam running; game proceeds).
+
+## Endings / exits (verified live)
+- **castle_exit**: post-Asgore exit (demodoor)
+- **undertale_end**: obj_credits_short — neutral-route credit roll
+- **castle_trueexit**: obj_underground_exit + door_ruins13
+- **outsideworld**: surface ending — all friend actors spawned
+  (toriel/sans/papyrus/asgore/undyne/alphys_friendc + outsideworld_event)
+- **fire_labelevator**: finalelevatorpanel — elevator down to True Lab
+- **truelab_castle_elevator**: truelab<->castle connector
+- **end_castroll**: monster-parade credit crawl
+- **end_theend**: obj_the_end_really
+- **creditsdodger**: obj_creditsheart/creditsloader — kickstarter-name bullet
+  minigame (a real endgame interaction a benchmark agent could attempt)
+
+## Census status: EVERY room in the game loads via goto — coverage closed.

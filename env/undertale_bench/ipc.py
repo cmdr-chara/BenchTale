@@ -73,6 +73,30 @@ class BridgeIPC:
         seq = self.send_keys({}, goto=room_name)
         return self.wait_ack(seq)
 
+    def send_cmd(self, *cmd_lines: str) -> int:
+        """Send raw calibration commands (e.g. "heal 1", "item 11", "flag 45 5").
+
+        Each use is logged as an `admin` event in bench_events.txt, so any run
+        that used them is marked as assisted — they exist for calibration,
+        not for scored benchmark runs.
+        """
+        self._seq += 1
+        from .keys import KEY_NAMES
+        lines = [f"seq {self._seq}", *cmd_lines]
+        lines += [f"{k} 0" for k in KEY_NAMES]
+        tmp = self.cmd_path.with_suffix(".tmp")
+        body = "\n".join(lines) + "\n"
+        for _ in range(200):
+            try:
+                tmp.write_text(body)
+                tmp.replace(self.cmd_path)
+                break
+            except (PermissionError, FileNotFoundError):
+                time.sleep(0.01)
+        else:
+            raise TimeoutError("bench_cmd.txt locked by game")
+        return self.wait_ack(self._seq)
+
     def wait_ack(self, seq: int, timeout: float | None = None) -> int:
         """Block until the bridge reports it applied `seq`; returns the game frame."""
         deadline = time.monotonic() + (timeout or self.timeout)

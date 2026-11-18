@@ -83,6 +83,35 @@ if (file_exists(""bench_cmd.txt""))
                     var ridx = asset_get_index(rn);
                     if (ridx != -1) room_goto(ridx);
                 }
+                // calibration-only admin commands; every use is logged as an
+                // admin event so a scored run that used them is flagged.
+                var admin = """";
+                if (k == ""heal"") { global.hp = global.maxhp; admin = k; }
+                if (k == ""item"")
+                {
+                    var iid = real(string_copy(line, sp + 1, 8));
+                    scr_itemget(iid); admin = k + "" "" + string(iid);
+                }
+                if (k == ""gold"")
+                {
+                    var gv = real(string_copy(line, sp + 1, 8));
+                    global.gold += gv; admin = k + "" "" + string(gv);
+                }
+                if (k == ""flag"")
+                {
+                    var rest = string_copy(line, sp + 1, 40);
+                    var sp2 = string_pos("" "", rest);
+                    var fid = real(string_copy(rest, 1, sp2 - 1));
+                    var fval = real(string_copy(rest, sp2 + 1, 20));
+                    global.flag[fid] = fval; admin = k + "" "" + string(fid) + ""="" + string(fval);
+                }
+                if (admin != """")
+                {
+                    global.bench_eseq += 1;
+                    var af2 = file_text_open_append(""bench_events.txt"");
+                    file_text_write_string(af2, string(global.bench_eseq) + "" "" + string(global.bench_frame) + "" admin "" + admin + chr(10));
+                    file_text_close(af2);
+                }
                 var vk = -1;
                 // names must match env/undertale_bench/keys.py
                 if (k == ""left"") vk = vk_left;
@@ -182,22 +211,22 @@ if (variable_global_exists(""item""))
 // soul + bullet + monster positions for dodge-aware agents
 var ho = asset_get_index(""obj_heart"");
 if (ho != -1 && instance_exists(ho)) { s += "","" + q + ""soul_x"" + q + "":"" + string(ho.x) + "","" + q + ""soul_y"" + q + "":"" + string(ho.y); }
-var bp = asset_get_index(""obj_asbulletparent"");
-if (bp != -1)
+var bcv = """";
+var bpa; bpa[0] = asset_get_index(""blt_parent""); bpa[1] = asset_get_index(""blt_parent_noborder"");
+var bpp;
+for (bpp = 0; bpp < 2; bpp++)
 {
+    var bp = bpa[bpp];
+    if (bp == -1) continue;
     var bn = instance_number(bp);
-    if (bn > 0)
+    var bi;
+    for (bi = 0; bi < bn; bi++)
     {
-        var bcv = """";
-        var bi;
-        for (bi = 0; bi < bn; bi++)
-        {
-            var bo = instance_find(bp, bi);
-            bcv += string(bo.x) + ""|"" + string(bo.y) + ""|"";
-        }
-        s += "","" + q + ""bullets"" + q + "":"" + q + bcv + q;
+        var bo = instance_find(bp, bi);
+        bcv += string(bo.x) + ""|"" + string(bo.y) + ""|"";
     }
 }
+if (bcv != """") s += "","" + q + ""bullets"" + q + "":"" + q + bcv + q;
 var mp = asset_get_index(""obj_monsterparent"");
 if (mp != -1)
 {

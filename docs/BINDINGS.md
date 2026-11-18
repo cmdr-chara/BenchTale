@@ -111,7 +111,8 @@ calibration backbone for every region's milestones.
 - **myfight**: 0 = menu AND bullet phases; 1 = attack bar; 2 = text phase.
 - **MERCY submenu is vertical** — down+z for Flee.
 - **XOXO**: X→O on step; O→green△ on re-step (resets fvic). obj_xoxocontroller1 = LEVER (not ball): pull with all-O → plot advance; else full reset. flag[63] += solved attempts.
-- **Kill counters**: flag[202]=Ruins(20), flag[203]=Snowdin(16), flag[200]=active counter id. Flags 222-225 are MUSIC, not kills.
+- **Kill counters (count UP)**: flag[202]=Ruins(genocide≥20), flag[203]=Snowdin(≥16), flag[204]=Waterfall(≥18), flag[205]=CORE/Hotland(≥40). flag[200]=active counter id (set by scr_steps arg3); flag[201]=global.kills snapshot; flag[222-225]=area kill markers. **Verified live**: `flag 203 16` → room_tundra8 loses Nice Cream vendor + snowball; flag[203]==0 repopulates them. Savepoint "Monsters left"/"But nobody came" text keys on flag[202]>=20 in-region (SCR_TEXT line ~9).
+- **Encounters are progress-gated**: at plot 0, random encounters never fired in ~12k walked steps across Snowdin+Waterfall rooms — the encounter counter arms per actual game progress, not room visits. Kill-counter verification uses flags + object A/B, not grinding from plot 0.
 - **Waterfall reachable**: `room_water_prewaterfall` loads (goto).
 - **Papyrus re-fight softlock**: teleporting out of `room_tundra_garage` mid-capture then re-triggering the fight leaves the fight-#2 intro text unadvancable (no key works — z/x/enter all dead). Bail requires process restart or a non-battle goto.
 - **Admin commands** (`bench_cmd.txt` lines, all logged as `admin` events): `heal 1`, `item <id>`, `gold <n>`, `flag <i> <v>`. Calibration-only — a scored run using them is marked assisted.

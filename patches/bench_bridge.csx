@@ -105,6 +105,26 @@ if (file_exists(""bench_cmd.txt""))
                     var fval = real(string_copy(rest, sp2 + 1, 20));
                     global.flag[fid] = fval; admin = k + "" "" + string(fid) + ""="" + string(fval);
                 }
+                if (k == ""plot"")
+                {
+                    var pv = real(string_copy(line, sp + 1, 8));
+                    global.plot = pv; admin = k + "" "" + string(pv);
+                }
+                if (k == ""speed"")
+                {
+                    var sv = real(string_copy(line, sp + 1, 8));
+                    room_speed = sv; admin = k + "" "" + string(sv);
+                }
+                if (k == ""freeme"")
+                {
+                    global.interact = 0;
+                    with (obj_writer) instance_destroy();
+                    with (obj_dialoguer) instance_destroy();
+                    with (obj_choicer) instance_destroy();
+                    var had = instance_exists(obj_mainchara);
+                    if (!had) { instance_create(320, 240, obj_mainchara); }
+                    admin = k + "" had="" + string(had);
+                }
                 if (admin != """")
                 {
                     global.bench_eseq += 1;

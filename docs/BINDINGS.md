@@ -130,3 +130,17 @@ calibration backbone for every region's milestones.
 | New Home/Castle | 5/7 | castle_front, elevatorout, precastle, finalshoehorn, barrier |
 | True Lab | 6/6 | hub, elevator, hall1, mirror, bedroom, power |
 | Endgame | 3/3 | sanscorridor, asrielroom, asrieltest |
+
+## Boot, freeze and death gotchas (live-verified 2026-11-18)
+
+- **Fresh-boot intro never reaches `room_intromenu`**: `room_introstory` ↔ `room_introimage` cycle indefinitely (~5k frames per cycle) even with zero input — and pressing z during introimage restarts the cycle. `goto room_intromenu` lands on the Continue menu but z/enter do not trigger the load (focus/latency unclear). Working path: `goto` straight to a gameplay room instead of fighting the intro.
+- **GOTO during intro leaves a stray `obj_writer`** (the story text crawl): it persists across rooms, holds `global.interact=1`, and freezes the player at the spawn point forever (px never moves, msg field keeps showing intro text). New `freeme` admin fixes it.
+- **Admin `freeme`**: sets `global.interact=0`, destroys all `obj_writer`/`obj_dialoguer`/`obj_choicer`, and spawns `obj_mainchara` if absent. Send it once after every `goto` that lands while a cutscene/dialogue object is alive.
+- **`room_gameover` crashes when file9 is missing**: `obj_gameover` Step calls `scr_tempload` → `ossafe_file_text_read_string` → "File is not opened for reading" error dialog that re-fires every frame (modal error loop; Ignore only advances to the next error). Root cause: death after a fresh boot that never created the file9 checkpoint. Fix: keep `%LOCALAPPDATA%/UNDERTALE/file9` present — copy of file0 works (same save format; the gameover reload then lands at the file0 savepoint).
+- **f203 grind live-verified**: 6 real kills in room_tundra6/7 at plot 54 (bgs 24/30/32) incremented flag[203] 0→6 and global.kills 0→5; ~1 battle per 150-300 walked holds. Encounter rate visibly drops as the counter climbs; Snowdrake (bg30) flees at low hp — battle ends, counter still ticked once (end-battle counter behavior differs from kills). Flag-set `flag 203 16` reproduces exhausted state (vendor/snowball absent in tundra8, verified earlier).
+- **`speed 60` during fights is lethal**: bullets move 2× while dodge reacts at wall-clock speed — instant death at LV1. Keep room_speed 30 for any real combat.
+
+## Route-test recipe (fast path)
+
+1. Boot → `goto <room>` (skip intro entirely) → `freeme` → `plot <n>` → `flag <ctr> <remaining>` for route state → play.
+2. For gameover safety keep a file9 present before any death-risk work.

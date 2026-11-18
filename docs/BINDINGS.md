@@ -300,3 +300,21 @@ plot jumped to 137 on save in savepoint1 — the save writes current globals).
 obj_encount_fire1 arms random battles (bg51 = 3-monster group) in fire5's upper
 zone. LV1 dodge dies to them (~2 deaths); heal-assisted fight + flee worked.
 kills counter increments on real kills (seen 1->2).
+
+## Mettaton EX (bg80) — verified live, played
+Trigger: room_fire_core_metttest, obj_mettboss_event at (150,780) fires when
+mainchara.y<840. Chain (decompiled): con 0..7 scrolls view to y620, reads
+undertale.ini Mettaton.BossMet (already>=1 -> skip variant), then the 28-line
+monologue writer -> "OH NO!" scrollaway -> mettafly -> battler bg80.
+- The monologue is ~10+ writer pages: keep tapping z; each page needs a press.
+  dlg field may read None while text renders (screenshot-verify instead).
+- murder=1 (scr_murderlv>=12) swaps in the Mettaton NEO variant path
+  (con 30-52: bg94 instead of bg80) and sets global.plot=199 after.
+- Post-fight: mettdestroyed_event -> plot 199.
+- Fight mechanics: FIGHT attack bar works; attack phases ~13hp lost at LV1
+  (heal-assisted for calibration). Yellow soul shoots with z during attacks.
+- myfight=1 = player turn; menu cursor persists on FIGHT between turns —
+  single `right` may drop (~50% taps), so ACT nav needs verify-and-retry.
+- Win is ratings-based (not kill): monsterhp exports 9999,50,50.
+- core_final room: obj_alphysfollow_event (Alphys walks with you after con 7,
+  sets flag[430]) -> finalelevatorpanel -> New Home.

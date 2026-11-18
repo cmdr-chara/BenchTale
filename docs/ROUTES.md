@@ -81,3 +81,9 @@ So a route is fully describable in engine state:
 - pacifist: flag[7]=0, kills=0
 - true pacifist: flag[7]=0, flag[88]>=4, flag[493]=10 -> True Lab -> 12
 - genocide: flag[7]=1, counters 202-205 exhausted, flag[26] high
+
+## Live-verified genocide swap (Snowdin town)
+flag[7]=1 + flag[203]=16: all townnpc_* gone, obj_snowdinlogo gone,
+grillbynpc_* (doggo/mandog/womandog evacuees) + obj_bigdog spawned.
+flag[7]=0 + flag[203]=0 restores normal town. Route state = observable
+in object census alone.

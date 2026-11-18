@@ -73,9 +73,10 @@ if (file_exists(""bench_cmd.txt""))
         {
             var line = file_text_read_string(cf); file_text_readln(cf);
             var sp = string_pos("" "", line);
-            if (sp > 0)
+            var k = line;
+            if (sp > 0) k = string_copy(line, 1, sp - 1);
+            if (true)
             {
-                var k = string_copy(line, 1, sp - 1);
                 var v = (string_copy(line, sp + 1, 4) == ""1"");
                 if (k == ""goto"")
                 {
@@ -118,17 +119,16 @@ if (file_exists(""bench_cmd.txt""))
                 if (k == ""freeme"")
                 {
                     global.interact = 0;
-                    with (obj_writer) instance_destroy();
-                    with (obj_dialoguer) instance_destroy();
-                    with (obj_choicer) instance_destroy();
-                    with (obj_unfader) instance_destroy();
-                    with (obj_fader) instance_destroy();
-                    with (obj_gameoverfake) instance_destroy();
-                    with (obj_persistentfader) instance_destroy();
-                    with (obj_introimage) instance_destroy();
-                    var had = instance_exists(obj_mainchara);
-                    if (!had) { instance_create(320, 240, obj_mainchara); }
-                    admin = k + "" had="" + string(had) + "" inter="" + string(global.interact) + "" nmc="" + string(instance_number(obj_mainchara));
+                    var wn = ""|obj_writer|obj_dialoguer|obj_choicer|obj_unfader|obj_fader|obj_gameoverfake|obj_persistentfader|obj_introimage|"";
+                    with (all)
+                    {
+                        var oname = ""|"" + object_get_name(object_index) + ""|"";
+                        if (string_pos(oname, wn) > 0) instance_destroy();
+                    }
+                    var mci = asset_get_index(""obj_mainchara"");
+                    var had = (mci != -1 && instance_exists(mci));
+                    if (!had && mci != -1) { instance_create(320, 240, mci); }
+                    admin = k + "" had="" + string(had);
                 }
                 if (admin != """")
                 {

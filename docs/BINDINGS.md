@@ -243,3 +243,22 @@ plot>=110 as the done predicate.
   the attack-bar z on myfight==1; a legit kill needs dozens of clean phases.
   Green-mode blocking is the workable mechanic; attack-bar timing is the
   bottleneck for a real LV1 clear.
+
+## Hotland live walk (post-Undyne)
+- After the Undyne kill: plot=122, kills=1, LV1->8, flag[350]=flag[352]=1;
+  undynefinal2/3 are exit corridors (east walk), Papyrus phonecall room
+  trigger at x~683 in undynefinal3, then room_fire1 (Hotland).
+- fire1: rock formation blocks straight east; slip north of solidwide(160,84)
+  via y~95-103 lane, then east to doorA(500,120) -> fire2 -> prelab.
+- fire_dock is a DETOUR room (riverman + dogboat): its north door returns
+  to fire2. The lab is room_fire_lab1 (141), reached via goto; the prelab
+  north door_t(215,-15) is blocked from the south side (solidexwide lip).
+- lab1: long dark hall ~1100px wide, walk east y~140; alphystrigger1 ~x663
+  -> lights + Alphys/Mettaton intro -> bg48 Mettaton quiz show battle.
+- QUIZ (bg48): questions use obj_answernodule (2x2 grid, arrow+z); wrong
+  answers zap hp but Mettaton cannot kill (floored at hp1). Observed through
+  the Alphys-help monologue.
+- GOTCHA: freeme inside a battle-side script DESTROYS the writers the battle
+  controller waits on -> permanent stall (intr latch cleared but controller
+  never resumes). Same class as the water8 view starvation. Rule: never
+  freeme inside room_battle — kill the process instead.

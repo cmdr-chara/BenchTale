@@ -52,3 +52,32 @@ obj_lastsans_trigger), coffins/throne (233-237). Kill flag[45]=4 etc.
 - Papyrus bg27 legit pass at LV1 (dodge or grind) — task pending
 - Real end-to-end route runs (genocide needs killable encounters or
   flag-assisted counters; flag-assisted verified: counters + NPC wipe live)
+
+## Route flag spine (decompile-verified)
+- **flag[7]** = genocide master flag. 294 references: all pacifist/NPC
+  content is gated `flag[7]==0`, genocide text/branches on `==1`.
+  Set it and the world empties globally (not just per-area counters).
+- **flag[8]** = secondary genocide-state flag (scr_enemynpc3: 7||8).
+- **flag[26]** = murder level (scr_murderlv input; drives route text depth).
+- **flag[88]** = Papyrus friendship: 1 hangout started, 2 progressed,
+  4 date done -> his room/house open (obj_papyrus_room/hisroom).
+- **flag[493]** = route progression spine:
+  - 8 = Undyne letter call + date done (undyne_lettercall/undynedate_afterward)
+  - 9 = post-Undyne-date (undyne_friendc ending scene)
+  - 10 = Alphys date done (obj_adate) -> gates mainend/endflowey/slidingdoor
+    (slidingdoor = True Lab entrance opens at >=10 && flag[7]==0)
+  - 12 = post-barrier true-ending world (castle music, elevatorout unlock,
+    asgore_finalintro branch)
+- **flag[495]** = event counter, +1 per SCR_TEXT call while <8.
+- **flag[496]** = Onion-san state machine: 0 first-meet, 1-7 x-threshold
+  progress in room_water_onionsan (triggers at x>550/700/850/1000 + 600-640),
+  -1 consumed/destroyed.
+- **flag[497]** = True Lab door_t state (<=1 vs ==1 branches in Alarm_2/Other_19).
+- **flag[45]** Toriel / **flag[17]** water8 spear scene as before.
+- flag[202-205] area kill counters + flag[200] active id + flag[201] kills.
+
+So a route is fully describable in engine state:
+- neutral: flag[7]=0, flag[26]=0, flag[493]<8
+- pacifist: flag[7]=0, kills=0
+- true pacifist: flag[7]=0, flag[88]>=4, flag[493]=10 -> True Lab -> 12
+- genocide: flag[7]=1, counters 202-205 exhausted, flag[26] high

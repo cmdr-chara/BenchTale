@@ -99,3 +99,17 @@ calibration backbone for every region's milestones.
 - Ruins: `eval/milestones.py` (calibrated)
 - Snowdin: `eval/snowdin_milestones.py` (this doc's bindings)
 - Waterfall/Hotland/NewHome/TrueLab: same pattern, plot+flag above.
+
+## Live-verified mechanics (this session)
+
+- **Savepoints**: touch → flavor text → auto-writes `file0` (continue point + respawn anchor). Verified: tundra_town @ (518,124). NOTE: the "File saved." box still has focus — press z once to dismiss before moving.
+- **Death rollback**: death restores `file9` checkpoint state (kills/plot/hp/lv revert). Snowdin's file9 anchor predates Doggo → every death in early Snowdin returns to tundra4 @ LV1/plot40 until a forward savepoint is touched.
+- **Papyrus (bg27, room_fogroom east end)**: never kills — hp→0 = capture → `room_tundra_garage` (shed, west exit only → tundra_town x2405). 3rd+ capture: "PERSISTENTEST" monologue, fight still re-triggers. Pass = survive full attack script then spare, or kill (680 HP).
+- **Doggo**: attacks only moving targets — stand still in his phase = 0 dmg.
+- **Dogi (bg25)**: trigger (447,402) in room_tundra_snowpuzz; plot→49 on start.
+- **Menu cursor has memory**: stays on last column → blind z keeps re-picking (e.g. ACT→Check). Use `_nav_to_col(s,0)` before FIGHT.
+- **myfight**: 0 = menu AND bullet phases; 1 = attack bar; 2 = text phase.
+- **MERCY submenu is vertical** — down+z for Flee.
+- **XOXO**: X→O on step; O→green△ on re-step (resets fvic). obj_xoxocontroller1 = LEVER (not ball): pull with all-O → plot advance; else full reset. flag[63] += solved attempts.
+- **Kill counters**: flag[202]=Ruins(20), flag[203]=Snowdin(16), flag[200]=active counter id. Flags 222-225 are MUSIC, not kills.
+- **Waterfall reachable**: `room_water_prewaterfall` loads (goto).

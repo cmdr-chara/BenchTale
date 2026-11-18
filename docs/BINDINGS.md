@@ -144,3 +144,6 @@ calibration backbone for every region's milestones.
 
 1. Boot → `goto <room>` (skip intro entirely) → `freeme` → `plot <n>` → `flag <ctr> <remaining>` for route state → play.
 2. For gameover safety keep a file9 present before any death-risk work.
+- **`freeme` must also nuke `obj_introimage`/`obj_unfader`/`obj_fader`/`obj_gameoverfake`/`obj_persistentfader`** — the boot-intro controller is *persistent* and survives `goto`; it keeps re-setting `global.interact=1` and re-creating the writer, re-freezing the player every frame. Found after water4/water5 freezes post-boot-goto.
+- **goto can spawn inside collision** (water4 dropped the player at 495,279 wedged on all sides) — if px/py never change after freeme, re-goto or pick another room.
+- **water5's east exit isn't a right-edge walk** — 200 right-holds never triggered a transition; the echo-flower room exits via a specific door/path (needs diagonal/route nav, or use goto).

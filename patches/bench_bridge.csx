@@ -121,9 +121,14 @@ if (file_exists(""bench_cmd.txt""))
                     with (obj_writer) instance_destroy();
                     with (obj_dialoguer) instance_destroy();
                     with (obj_choicer) instance_destroy();
+                    with (obj_unfader) instance_destroy();
+                    with (obj_fader) instance_destroy();
+                    with (obj_gameoverfake) instance_destroy();
+                    with (obj_persistentfader) instance_destroy();
+                    with (obj_introimage) instance_destroy();
                     var had = instance_exists(obj_mainchara);
                     if (!had) { instance_create(320, 240, obj_mainchara); }
-                    admin = k + "" had="" + string(had);
+                    admin = k + "" had="" + string(had) + "" inter="" + string(global.interact) + "" nmc="" + string(instance_number(obj_mainchara));
                 }
                 if (admin != """")
                 {

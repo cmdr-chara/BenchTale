@@ -190,3 +190,23 @@ statue(104), onionsan event(100), carrybird(99), shyren(101), dogroom
 rarependant(103), Mad Dummy trigger(115), napstablookdate(120),
 temvillage(128), glowshroom/darkness puzzles(127,129).
 room_water7_older(304) did not ack goto — likely dead/unused.
+
+## Live bullet export (blt) + dialogue edges
+- state JSON now has `blt`: [[x,y],...] of up to 24 live projectiles, matched by
+  object name prefix `blt_*` or a fixed obj_* list (undynespear, sans bones,
+  mettaton, spider, etc). Verified live in water9 chase — dodging off blt
+  took 0 damage across the spear phase.
+- **writer/dialogue needs press EDGES**: holding z does nothing once latched;
+  alternate `z 0` / `z 1` taps. Held-key re-press only re-fires when the key
+  is unheld, so a held z produces a single edge total.
+- **bridge now spawns in every early room** (room_start..room_ruins1): the boot
+  path varies when save data exists (introstory is skipped -> bridge never
+  spawned and the intro froze on "Hi."). Self-dedup keeps the first spawn.
+
+## water9 chase (obj_undyneencounter2, verified live end-to-end)
+cn0 spawn uspeargen -> x>460 speeds spears -> x>510 locks interact, Undyne
+walks on (cn3-23 scripted ~30s) -> cn24 waits for player in x(200-220)/(780-790)
+-> cn25-33 Monster Kid runs over, dialogue (needs z edges) -> cn38:
+plot=110, interact=0, flag[15/16/17]=0, sl1/sl2 solids removed, music resumes.
+Flag[17] is RESET by cn23 — it's "scene in progress", not "scene done"; use
+plot>=110 as the done predicate.

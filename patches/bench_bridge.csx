@@ -33,6 +33,11 @@ Data.GameObjects.Add(obj);
 // -------------------------------------------------------------- step GML ---
 const string stepGml = @"
 // ---- undertale-bench bridge (injected) ----
+// placed in several early rooms; persistent -> keep only the first spawn
+if (instance_number(object_index) > 1)
+{
+    if (id != instance_find(object_index, 0)) { instance_destroy(); exit; }
+}
 if (!variable_global_exists(""bench_seq"")) { global.bench_seq = -1; global.bench_frame = 0; }
 global.bench_frame += 1;
 
@@ -55,6 +60,17 @@ if (!variable_global_exists(""bench_ev_init""))
     global.bench_pv_gold = -999;
     global.bench_pv_kills = -999;
     var _h; for (_h = 0; _h < 16; _h++) { global.bench_hvk[_h] = -1; global.bench_hon[_h] = 0; }
+    global.bench_bpar[0] = asset_get_index(""blt_parent"");
+    global.bench_bpar[1] = asset_get_index(""blt_parent_noborder"");
+    global.bench_bpar[2] = asset_get_index(""obj_sansbullet_parent"");
+    global.bench_bpar[3] = asset_get_index(""obj_asbulletparent"");
+    global.bench_bpar[4] = asset_get_index(""obj_asgorebulparent"");
+    global.bench_bpar[5] = asset_get_index(""obj_spiderbulletparent"");
+    global.bench_bpar[6] = asset_get_index(""obj_metttestbulletparent"");
+    global.bench_bpar[7] = asset_get_index(""obj_amalgambul_parent"");
+    global.bench_bpar[8] = asset_get_index(""obj_undynespear"");
+    global.bench_bpar[9] = asset_get_index(""blt_uspear"");
+    global.bench_bpar[10] = asset_get_index(""obj_bulletgenparent"");
 }
 
 // held keys: keyboard_key_press only simulates one frame in GMS1.4,
@@ -338,6 +354,26 @@ var tm = asset_get_index(""obj_time"");
 if (tm != -1 && instance_exists(tm)) { with (tm) { global.bench_tr = right; global.bench_tryr = try_right; } s += "","" + q + ""tr"" + q + "":"" + string(global.bench_tr) + "","" + q + ""tryr"" + q + "":"" + string(global.bench_tryr); }
 var ue = asset_get_index(""obj_undyneencounter1"");
 if (ue != -1 && instance_exists(ue)) { with (ue) { global.bench_cn = cn; } s += "","" + q + ""cn"" + q + "":"" + string(global.bench_cn); }
+// live bullet positions (dodge brain input) — cap 24, [x,y] rounded.
+// name-prefix match: virtually every projectile is blt_* or one of the
+// obj_* names below; avoids object_is_ancestor/break edge cases.
+s += "","" + q + ""blt"" + q + "":["";
+var bn = 0;
+var bpat = ""|obj_undynespear|obj_uspear|obj_rotspear|obj_spearbullet_follow|obj_risespearbullet|obj_blockbullet|obj_xbullet|obj_warplinebullet|obj_lavabullet|obj_spiderbullet|obj_donutbullet|obj_sunbullet|obj_meteorbullet|obj_megaflybullet|obj_frogbullet_ex|obj_sonbullet|obj_astigmatism_bullet|obj_butterflybullet|obj_doodlebullet|obj_handbullet_new|obj_bulletbomb|obj_asgorefakespear|obj_menubone|obj_menubone_bottom|obj_bonewall|obj_bonestab|obj_boneloop_v|obj_boneplat|obj_sans_bonebul|"";
+with (all)
+{
+    if (bn < 24)
+    {
+        var onm = object_get_name(object_index);
+        if (string_pos(""blt_"", onm) == 1 || string_pos(""|"" + onm + ""|"", bpat) > 0)
+        {
+            if (bn > 0) s += "","";
+            s += ""["" + string(round(x)) + "","" + string(round(y)) + ""]"";
+            bn += 1;
+        }
+    }
+}
+s += ""]"";
 s += ""}"";
 var sf = file_text_open_write(""bench_state.json"");
 file_text_write_string(sf, s);
@@ -476,22 +512,25 @@ importGroup.Import();
 // keyboard_check does not -- the earlier suspicion was inverted; leave stock.
 
 
-// ------------------------------------------------- place in the first room ---
-UndertaleRoom room = Data.Rooms.ByName("room_introstory")
-    ?? (Data.Rooms.Count > 0 ? Data.Rooms[0] : null);
-if (room != null)
+// ------------------------------- place in every early room -----------------
+// The boot path varies (introstory, introimage, intromenu, straight to ruins
+// when save data exists); the object is persistent, so whichever of these
+// rooms runs first spawns the one bridge instance.
+string[] spawnRooms = {
+    "room_start", "room_introstory", "room_introimage", "room_intromenu",
+    "room_area1", "room_area1_2", "room_ruins1"
+};
+foreach (var rn in spawnRooms)
 {
+    var room = Data.Rooms.ByName(rn);
+    if (room == null) continue;
     var inst = new UndertaleRoom.GameObject();
     inst.InstanceID = Data.GeneralInfo.LastObj++;
     inst.ObjectDefinition = obj;
     inst.X = 0; inst.Y = 0;
     inst.CreationCode = null;
     room.GameObjects.Add(inst);
-    ScriptMessage($"bench_bridge injected; instance {inst.InstanceID} placed in {room.Name.Content}.");
-}
-else
-{
-    ScriptMessage("bench_bridge injected as object only — no rooms in data file");
+    ScriptMessage($"bench_bridge injected; instance {inst.InstanceID} placed in {rn}.");
 }
 
 ChangeSelection(obj);

@@ -519,3 +519,18 @@ monologue writer -> "OH NO!" scrollaway -> mettafly -> battler bg80.
 - Elevator chain for walk-back: 216 room_castle_elevatorout (elevatordoor
   80,90 + savepoint 420,150) -> elevator interior 215 room_fire_finalelevator
   (obj_finalelevatorpanel 140,80).
+
+## Neutral ending chain (verified live, full playthrough)
+- From room_castle_barrier aftermath: `goto room_castle_trueexit` (240) —
+  dark room, lit grass patch; walking north into it -> 239 room_undertale_end.
+- 239 runs the neutral epilogue: Sans phone call narrating Underground's
+  fate (Asgore dead -> "heartbroken over the king"), then per-character
+  epilogue beats (Papyrus sleepover joke...), then Flowey's closing
+  address to the player. All z-advancable, no inputs beyond text advance.
+- Sequence end: game reloads the save -> lands in room 235 (throneroom,
+  Asgore's throne covered) with **plot=999** (post-ending sentinel).
+- Barrier room reset caveat: after `goto room_castle_barrier` the room
+  replays the Asgore+souls tableau (7 containers) but the consumed
+  barrierevent can't re-arm -> scene never advances. Use trueexit instead.
+- NOTE: 241 room_outsideworld loads standalone (surface scene with all
+  friend actors) but is NOT on the neutral path — true-pacifist only.

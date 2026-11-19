@@ -318,3 +318,46 @@ monologue writer -> "OH NO!" scrollaway -> mettafly -> battler bg80.
 - Win is ratings-based (not kill): monsterhp exports 9999,50,50.
 - core_final room: obj_alphysfollow_event (Alphys walks with you after con 7,
   sets flag[430]) -> finalelevatorpanel -> New Home.
+
+## New Home / Asgore's house — route spine (verified live)
+- Route: castle_elevatorout -> castle_precastle (grey street, door_s_musfade at
+  ~1996,136 -> lastruins_corridor at its EAST end) -> castle_hook -> castle_front.
+- castle_front is a DEAD END: doorA (160,160)->asghouse1, doorBmusicfade
+  (160,520)->castle_hook (back). Forward path is THROUGH the house.
+- asghouse1 (foyer): center staircase splits lower/upper; upper landing
+  reachable via up-left diagonal around ~(49,59)->(36,59), then east along
+  y~120-123 lane. `obj_doorXmusicfade` (144,109) -> **room_basement1_final**
+  guarded by the chain.
+- Lock/keys: `obj_latchkey` sets flag[452]=1 (kitchen key, room_kitchen_final
+  at (122,126)) and flag[453]=1 (hallway key, room_asghouse3 at (540,117)).
+  `obj_lock_and_key` (226,104 in asghouse1) sets flag[454]=1 when both flags
+  are 1 -> chain sprite dies, interact fires con->3. Key pickup = touch
+  radius ~14px facing the object.
+- Kitchen: reached via asghouse2 north door (door_ruins13 54,220 spawn side /
+  the top-left stair door). obj_npc_room (146,188) story monster.
+- asghouse3 (hallway): east-west corridor; doorC (151,124)->room_asgoreroom,
+  doorA (570,123)->room_asgoreroom as well (two doors one room), doorD
+  (0,183)->asghouse1 west floor (lands 25,164). obj_earlystorybattle (465,142)
+  fires storybattle. obj_mirrorreflection (120,87) — non-interactive z.
+- room_asrielroom_final (kids' room): entered via asghouse3 doorC area
+  (warp (226,110) triggered it / north door), 5 readables, exits doorD
+  south -> asghouse3 (151,175).
+- GOTCHA: doorXmusicfade's basement trigger is the STAIRS mouth — standing
+  (144,119) capped; the verified entry was `goto` (couldn't find the exact
+  walk-in lane; the door obj anchor 144,109 sits in a solid band y~105-119).
+- Basement chain: basement1_final (doorX west back, doorA east 480,140,
+  story_engager 360,120) -> basement2_final -> basement3_final (doorA north
+  180,0) -> basement4_final (story_engager 220,160, doorA east 300,180)
+  -> room_lastruins_corridor. Each room interleaves storybattle scenes.
+- lastruins_corridor: ~2048px east-west, 9 obj_story_engager at y=160 x
+  180-1700 (each = one storybattle segment). East end: obj_elevatordoor
+  (1980,112) sealed/unresponsive + door_s_musfade (1996,136) -> back to
+  castle_precastle. REAL forward exit: doorA (1900,220) south ->
+  room_sanscorridor (spawn 150,172).
+- sanscorridor (Judgement Hall): obj_lastsans_trigger (820,120) at x~800
+  fires the full judgement scene (long monologue, ~45 z-taps) -> plot=201.
+  doorA north (1240,90) -> room_castle_finalshoehorn.
+- finalshoehorn: savepoint (460,110), doorAmusicfade (680,520), doorB
+  (180,520), doorXmusicfade (400,90).
+- Route flags: flag[452]/[453] = the two keys; flag[454]=1 = chain unlocked.
+  flag[7] must be 0 for the musicfade doors (checked in their Alarm_2).

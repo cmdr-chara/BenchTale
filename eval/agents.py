@@ -86,7 +86,8 @@ Naming screen (room_intromenu): "naming" is the phase (1=typing a name on a
 letter grid, 2=confirm choice, 3=main menu). "charname" is the text entered so
 far. "sel_row"/"sel_col" is the grid cursor — arrows move it one cell per tap;
 row -1 is the bottom menu (col 0=Quit, 1=Backspace, 2=Done).
-"sel2" is the highlighted confirm option; "sel" is the main-menu cursor.
+"sel2" is the highlighted confirm option (0/1 — left/right toggles it; confirm
+with sel2=1 to accept the name). "sel" is the main-menu cursor.
 """
 
 

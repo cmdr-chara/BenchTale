@@ -428,3 +428,24 @@ monologue writer -> "OH NO!" scrollaway -> mettafly -> battler bg80.
   pass is feasible only with better dodging — but Papyrus captures at 0hp
   (garage shed), never kills, so retries cost nothing.
 - Fight trigger: room_fogroom walk east past x~459 -> scene -> bg27.
+
+## Genocide-lean verification (live + decompile)
+- scr_murderlv() computes the murder ladder from boss/counter flags — NOT
+  flag[26] (flag[26] is written BY it). Gates: mrd1 flag[202]>=20; mrd2
+  flag[45]==4 (Toriel); mrd3-5 flag[52/53/54]==1; mrd6 flag[57]==2 (Papyrus);
+  mrd7 flag[203]>=16; mrd8 flag[67]==1; mrd9 flag[81]==1; mrd10 flag[252]==1;
+  mrd11 flag[204]>=18; mrd12 flag[251]==1 && flag[350]==1 (Undyne);
+  mrd13 flag[402]==1 (Muffet); mrd14 flag[397]==1 (NEO); mrd15 flag[205]>=40;
+  mrd16 flag[425]==1 && flag[27]==0.
+- Mettaton NEO (bg94): VERIFIED LIVE — mettboss_event at
+  room_fire_core_metttest(150,780) with murderlv>=12 armed the NEO variant;
+  one FIGHT strike one-shots him (mhp went -32669), plot ->199.
+- Sans bg95: obj_lastsans_trigger (room_sanscorridor x=820) — Create checks
+  scr_murderlv()>=16; murder branch jumps scene con 4.1 -> 100, runs the
+  genocide preamble, then con111 sets battlegroup=95 + spawns obj_battler.
+  VERIFIED LIVE: the murder-path judgement dialogue plays ("if you refuse
+  to fight..."). obj_battler's room transition did not complete in-session
+  (same class as core_freebattle scripted-battle deadlock — needs a clean
+  non-goto entry to fully verify bg95 in room_battle).
+- undertale.ini Sans F >=3 fast-forwards the preamble (death counter).
+- kills counter does NOT increment for scripted kills (Asgore, NEO).

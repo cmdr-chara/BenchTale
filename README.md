@@ -49,6 +49,8 @@ python eval/run_eval.py --agent vlm --mode lite --steps 2000 --out runs/gpt4o_ru
 
 `UBENCH_PROVIDER=anthropic` + `UBENCH_API_BASE=https://api.anthropic.com` works the same.
 
+`--obs-mode` picks the difficulty tier, recorded in `result.json` for leaderboard comparability: `full` (screenshot + engine state, the default), `vision` (pixels only — VideoGameBench tier), `state` (textual state dump only — BALROG-text tier).
+
 ## Legal
 
 Undertale is © Toby Fox. This repo contains only patch/instrumentation code; it neither ships nor downloads game assets. The patched `data_bench.win` never leaves your machine.

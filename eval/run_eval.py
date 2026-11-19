@@ -53,6 +53,10 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--agent", default="scripted")
     ap.add_argument("--mode", default="lite", choices=["lite", "real-time"])
+    ap.add_argument("--obs-mode", default="full",
+                    choices=["full", "vision", "state"],
+                    help="full = screenshot+state (assisted tier), vision = pixels only "
+                         "(VideoGameBench-tier), state = text dump only (BALROG-text tier)")
     ap.add_argument("--steps", type=int, default=500)
     ap.add_argument("--out", default="runs/latest")
     args = ap.parse_args()
@@ -76,7 +80,12 @@ def main() -> None:
 
     with log_path.open("w") as log:
         for i in range(args.steps):
-            action = agent.act(obs)
+            agent_obs = dict(obs)
+            if args.obs_mode == "vision":
+                agent_obs["state"] = None
+            elif args.obs_mode == "state":
+                agent_obs["screen"] = None
+            action = agent.act(agent_obs)
             obs, _r, term, _trunc, info = env.step(action)
             st = info["state"]
 
@@ -133,7 +142,8 @@ def main() -> None:
         }
 
     result = {
-        "agent": agent.name, "mode": args.mode, "steps": args.steps,
+        "agent": agent.name, "mode": args.mode, "obs_mode": args.obs_mode,
+        "steps": args.steps,
         "wall_clock_s": round(time.time() - t0, 2),
         "route": route,
         "milestones": per_region,

@@ -556,3 +556,13 @@ monologue writer -> "OH NO!" scrollaway -> mettafly -> battler bg80.
   consumed, `goto room_castle_barrier` replays the Asgore+souls tableau
   but never fires the finale scene again; relaunch the process instead
   (file0 loads directly into 237 in this save).
+
+
+## Genocide Sans arm + battle (verified live)
+
+Flag suite: `flag 7 1` (genocide master), `flag 26 16` (murder lv), `flag 203 16` / `flag 204 18` / `flag 205 25` (kill counters), `flag 57 1` (Papyrus), `flag 350 1` (Undyne), `flag 397 1` (Mettaton NEO), `plot 190`.
+
+- `goto room_sanscorridor` (231) -> walk east -> `obj_lastsans_trigger` at px~800 fires the judgement scene in the golden hall (Sans + Frisk silhouettes, "this is why i never make promis"). z-advances the speech.
+- Scene chain: 231 -> room_battle **battlegroup 95** (Sans: "Should be burning in hell", KR meter in HUD) -> his opening attack kills LV1 Frisk -> room_gameover -> respawn in 231 -> scene re-arms -> battle again (loop while z is being tapped).
+- goto works for this room; con111 did NOT need a natural corridor entry.
+- story_engager freeze in room_lastruins_corridor (230): post-ending Flowey monologue cutscene locks mv=0/intr=1 and does NOT respond to z/x/enter -- `freeme` clears it, then east walk reaches px 2019. Room 230->231 door is the SE one (~1860-1900,220), easy to miss; goto 231 is the reliable arm.

@@ -27,7 +27,7 @@ ENDGAME_MILESTONES = [
     ("throneroom",       "Asgore meet in the throneroom",                lambda s: _plot_ge(s, 206) or _room(s, "room_castle_throneroom"), "calibrated"),
     ("barrier_reached",  "Reached the barrier",                          lambda s: _plot_ge(s, 207) or _room(s, "room_castle_barrier"), "calibrated"),
     ("asgore_fight",     "Asgore fight (bg100)",                         lambda s: _battlegroup(s, 100) or _plot_ge(s, 208), "calibrated"),
-    ("flowey_omega",     "Post-Asgore Flowey sequence",                  lambda s: _room_in(s, "room_flowey_endchoice", "room_castle_exit"), "needs_calibration"),
+    ("flowey_omega",     "Omega-Flowey aftermath choice (kill/spare wilted Flowey)", lambda s: _room(s, "room_flowey_endchoice") or _flag(s, 475, 1), "calibrated"),
     ("ending_reached",   "An ending reached (plot 999 sentinel)",        lambda s: _plot_ge(s, 999) or _room_in(s, "room_undertale_end", "room_end_theend"), "calibrated"),
 ]
 
@@ -57,7 +57,7 @@ ENDGAME_OPTIONAL = [
     ("murderlv_16",      "Max murder level reached (flag[26]>=16)",      lambda s: _flag_ge(s, 26, 16), "calibrated"),
     # Judgement outcome
     ("sans_judged",      "Sans delivered a judgement (any branch)",      lambda s: _room(s, "room_sanscorridor") and _plot_ge(s, 201), "calibrated"),
-    ("key_rooms",        "Asgore's house keys found (chain lock opened)", lambda s: _room(s, "room_asghouse3"), "needs_calibration"),
+    ("key_rooms",        "Asgore's house keys found (chain lock opened)", lambda s: _room(s, "room_asghouse3"), "calibrated"),
     ("heart_locket",     "Heart Locket from Asgore's house (item 50)",    lambda s: _has_item(s, 50),  "calibrated"),
     ("worn_dagger",      "Worn Dagger from Asgore's house (item 51)",     lambda s: _has_item(s, 51),  "calibrated"),
     ("real_knife",       "The Real Knife (genocide, item 52)",            lambda s: _has_item(s, 52),  "calibrated"),

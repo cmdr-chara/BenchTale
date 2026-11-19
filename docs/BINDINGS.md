@@ -583,3 +583,16 @@ Corrections to earlier notes:
 scr_murderlv() ladder (verified): 202>=20 ruins -> 45==4 toriel -> 52==1 doggo -> 53==1 dogi -> 54==1 greatdog -> 57==2 snowdrake -> 203>=16 snowdin -> 67==1 papyrus -> 81==1 shyren -> 252==1 gladdummy -> 204>=18 waterfall -> 251==1 && 350==1 undying -> 402==1 royalguards -> 397==1 muffet -> 205>=40 hotland+core -> 425==1 && 27==0 mettaton -> mrd16.
 
 New milestone files: eval/waterfall_milestones.py (plot 104-122), eval/hotland_milestones.py (plot 122-199, incl CORE), eval/endgame_milestones.py (plot 199-999 + endings + classify_route()). Snowdin optional set fixed (genocide_snowdin now flag203>=16; added per-dog kill flags and town side rooms).
+
+## Genocide ending — Chara ERASE scene (verified live 2026-11-19)
+
+Route on a flag-probe (no real run): set all murder-ladder flags (202>=20, 203=16, 204=18, 205>=40, 45=4, 52/53/54=1, 57=2, 67=1, 81=1, 252=1, 251=1, 350=1, 397=1, 402=1, 425=1), **plot <= 205** (see below), then `goto room_castle_barrier` -> walk into `obj_barrierevent` (150,140).
+
+Sequence captured: "This is the barrier." + Continue/Go Back choicer -> battlegroup 100 (genocide scripted: Asgore dies) -> Flowey plead -> obj_floweygonk (Flowey slashed, alarm_3 -> `instance_create(0,0,obj_truechara)`) -> Chara monologue ("Greetings.", "Together, we eradicated...", "We'll be together forever") -> ERASE/DO NOT choicer -> all-9s slash screen -> `obj_gameshake` (deletes file0-file9 + undertale.ini, writes `system_information_962`) -> game restarts.
+
+Gotchas:
+- `obj_asgoremeet_event` in throneroom (140,500) **self-destroys when plot>205** (Create_0); at mrd>=16 its con=99 branch still lands on bg100.
+- Post-ERASE the game writes `system_information_962` (obj_gameshake); `obj_nothingness_event` (room_nothingness boot) later deletes 962 and writes `system_information_963` = "soul sold" marker; `obj_time_Step_1` checks `962 && !963` for tainted state; `obj_titleimage`/`obj_truechara`/`obj_the_end_really` check 963 for variant dialogue.
+- After the erase + internal restart the barrier scene can respawn wedged at the "Continue / Go Back" choicer (intr=1, all keys ignored, choice=-1, `dbg_zcheck=0`) — same orphaned-writer freeze as room 230; `freeme` clears it.
+- Walking 'up' out of the empty barrier room after the erase goes into void (py went negative past -10000) — no door.
+- Detecting the ending from outside: `system_information_962` exists in AppData saves dir, file0-9 gone. In-state there's no dedicated flag (gameshake is file-side).

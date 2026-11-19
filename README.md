@@ -51,6 +51,10 @@ python eval/run_eval.py --agent vlm --mode lite --steps 2000 --out runs/gpt4o_ru
 
 `--obs-mode` picks the difficulty tier, recorded in `result.json` for leaderboard comparability: `full` (screenshot + engine state, the default), `vision` (pixels only — VideoGameBench tier), `state` (textual state dump only — BALROG-text tier).
 
+### First recorded run
+
+`deepseek-v4.1-flash` (effort=low, `--obs-mode state`, 400 steps, ~1.7h): **score 0.0** — failed at the name-entry screen. It navigated the letter grid correctly and typed a name, but never toggled the confirm highlight, burning all 400 steps in `room_intromenu`. UI-navigation failures count as benchmark results, not bugs — the transcript is in `runs/ds41_run4/steps.jsonl`.
+
 ## Legal
 
 Undertale is © Toby Fox. This repo contains only patch/instrumentation code; it neither ships nor downloads game assets. The patched `data_bench.win` never leaves your machine.

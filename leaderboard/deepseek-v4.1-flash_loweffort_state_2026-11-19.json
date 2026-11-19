@@ -1,0 +1,13 @@
+{
+  "model": "deepseek/deepseek-v4.1-flash (effort=low, via Command Code CLI)",
+  "mode": "lite",
+  "score": 0.0,
+  "milestones_hit": [],
+  "milestone_frames": {},
+  "milestone_seconds": {},
+  "steps": 400,
+  "wall_clock_s": 6256.47,
+  "deaths": 0,
+  "event_counts": {"room": 2},
+  "notes": "obs-mode=state (text only, no screenshot). Failed at the name-entry screen: navigated the letter grid correctly (typed 'Axxxxq'/'Axx'), reached the confirm prompt repeatedly, but never toggled sel2 to accept. 400 steps, never left room_intromenu. run dir: runs/ds41_run4"
+}

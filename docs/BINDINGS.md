@@ -534,3 +534,25 @@ monologue writer -> "OH NO!" scrollaway -> mettafly -> battler bg80.
   barrierevent can't re-arm -> scene never advances. Use trueexit instead.
 - NOTE: 241 room_outsideworld loads standalone (surface scene with all
   friend actors) but is NOT on the neutral path — true-pacifist only.
+
+## True-pacifist ending chain (verified live, full playthrough)
+- `goto room_outsideworld` (241) runs the surface sunset scene — all six
+  friends silhouetted; Toriel/Sans banter, all z-advanceable; ends with
+  the cast walking off and the sun dimming.
+- Then the gag epilogue credits roll across rooms 278-284 ("Still
+  Thinking About That Stick", Astigmatism "Still A Big Bully", etc.) ->
+  "Good night." thank-you screen -> 285 room_end_myroom (post-credits
+  Frisk bedroom) -> **286 room_end_theend = "UNDERTALE - THE END" +
+  annoying dog**. Ending complete.
+- Asriel battle re-arm soft-lock (FIXED): obj_asrielb.Create does
+  `turns = global.flag[504] - 3`; the per-turn write-back only fires when
+  turns exceeds flag[504]. A battle re-armed after a completed run
+  (flag[504] ~14) derives turns=11 and can never catch up -> infinite
+  turn-11 loop. Fix: `flag 504 0` BEFORE re-entering so turns=0.
+- bg100 = the friendscene battle (Toriel interrupts Asgore fight);
+  bg255/256 = Asriel phase ids; turns==13 = Hyper Goner; SAVE groups are
+  flags 505-508 (four groups, all set by the earlier SAVE completion).
+- Barrier-room scene is one-shot per boot: after the barrierevent is
+  consumed, `goto room_castle_barrier` replays the Asgore+souls tableau
+  but never fires the finale scene again; relaunch the process instead
+  (file0 loads directly into 237 in this save).

@@ -81,6 +81,12 @@ died, careful now") — not technical notes. It is judged as part of the run.
 
 Play only from what you see and what the state tells you: no walkthrough
 knowledge, no wiki spoilers. Explore, read dialogue, figure it out.
+
+Naming screen (room_intromenu): "naming" is the phase (1=typing a name on a
+letter grid, 2=confirm choice, 3=main menu). "charname" is the text entered so
+far. "sel_row"/"sel_col" is the grid cursor — arrows move it one cell per tap;
+row -1 is the bottom menu (col 0=Quit, 1=Backspace, 2=Done).
+"sel2" is the highlighted confirm option; "sel" is the main-menu cursor.
 """
 
 
@@ -101,7 +107,8 @@ def _prune_state(st: dict) -> dict:
     for k in ("room_name", "px", "py", "hp", "maxhp", "lv", "exp", "gold",
               "plot", "in_battle", "battlegroup", "dialogue", "choicer",
               "choice", "interact", "msg", "kills", "soul_x", "soul_y",
-              "monsterhp", "at", "df"):
+              "monsterhp", "at", "df", "naming", "charname", "sel_row",
+              "sel_col", "sel2", "sel"):
         v = st.get(k)
         if v is not None and v != "" and v != "None":
             keep[k] = v
@@ -268,6 +275,9 @@ class CmdCLiAgent(Agent):
              "\n\nRespond with ONLY the JSON action object.")
         argv = [self._node, self._entry, "-p", q, "-m", self.model,
                 "--max-turns", "2", "--skip-onboarding", "--no-auto-update"]
+        effort = os.environ.get("UBENCH_CC_EFFORT")
+        if effort:
+            argv += ["--effort", effort]
         try:
             r = subprocess.run(argv, capture_output=True, text=True, timeout=180)
             text = r.stdout.strip()

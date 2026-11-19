@@ -419,6 +419,21 @@ with (all)
     }
 }
 s += ""]"";
+// intro menu / naming screen state — grid cursor + name buffer, so text-mode
+// agents (no screenshot) can navigate the letter grid.
+var im = asset_get_index(""obj_intromenu"");
+if (im != -1 && instance_exists(im))
+{
+    with (im)
+    {
+        s += "","" + q + ""naming"" + q + "":"" + string(naming);
+        s += "","" + q + ""charname"" + q + "":"" + q + string(charname) + q;
+        s += "","" + q + ""sel_row"" + q + "":"" + string(selected_row);
+        s += "","" + q + ""sel_col"" + q + "":"" + string(selected_col);
+        s += "","" + q + ""sel2"" + q + "":"" + string(selected2);
+        s += "","" + q + ""sel"" + q + "":"" + string(selected);
+    }
+}
 s += ""}"";
 var sf = file_text_open_write(""bench_state.json"");
 file_text_write_string(sf, s);

@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/logo.png" alt="BenchTale" width="600"></p>
+
 # BenchTale
 
 A benchmark where an AI model must finish **Undertale** — or at least the **Ruins** — by playing the real game.

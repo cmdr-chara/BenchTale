@@ -14,7 +14,7 @@ Unlike screenshot-and-keyboard harnesses, undertale-bench patches `data.win` wit
 ```
 patches/    UndertaleModTool .csx script that injects obj_bench_bridge into data.win
 env/        Python Gymnasium environment (screenshot + state obs, key-state actions)
-eval/       Agent runner, Ruins milestone scoring, step recording
+eval/       Agent runner (scripted + VLM), milestone scoring for every region, step recording
 leaderboard/ Result schema and submitted runs
 scripts/    fetch_utmt.ps1 / patch_datawin.ps1 helpers
 docs/       DESIGN.md — architecture, metrics, related work
@@ -32,6 +32,22 @@ docs/       DESIGN.md — architecture, metrics, related work
 
    Steam's `steam_api.dll` forces a restart through the Steam client when launched directly. Two options: rename `steam_api.dll` in the game dir (Undertale runs fine without it — this is what the eval scripts assume), or leave it and add `-game data_bench.win` in Steam → Properties → Launch Options and press Play (warns if your account is in use elsewhere).
 6. `python eval/run_eval.py --agent scripted` for a smoke run. `python eval/play.py` is an interactive driver; `eval/playbook.py` (tap/hold/goto/shot helpers) is what real sessions use to drive the game. `ipc.goto_room("room_ruins7")` teleports for testing — scripted fights still need real progression.
+
+## Scoring
+
+`run_eval` scores every calibrated milestone across the whole game — Ruins (10+10), Snowdin (13+22), Waterfall (13+29), Hotland+CORE (13+25), New Home→endings (8+27), main-path plus optional/exploration ids — and classifies the route (neutral / pacifist / true pacifist / genocide) from flag state. Results land in `runs/<name>/result.json` with per-region breakdown and first-hit frames.
+
+## VLM agent
+
+`--agent vlm` drives the game with a vision-language model: each step sends the screenshot + pruned game state to a chat-completions endpoint and injects the returned keys. Every decision must carry a psychological `why` (human-style inner monologue), which is logged into `steps.jsonl`.
+
+```
+UBENCH_PROVIDER=openai   UBENCH_API_BASE=https://api.openai.com/v1
+UBENCH_API_KEY=...       UBENCH_MODEL=gpt-4o
+python eval/run_eval.py --agent vlm --mode lite --steps 2000 --out runs/gpt4o_run
+```
+
+`UBENCH_PROVIDER=anthropic` + `UBENCH_API_BASE=https://api.anthropic.com` works the same.
 
 ## Legal
 

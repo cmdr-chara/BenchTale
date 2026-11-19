@@ -16,7 +16,7 @@ from milestones import reached as _reached_ruins, reached_optional as _reached_r
 
 def _load_registries():
     regs = [_reached_ruins, _reached_ruins_opt]
-    for mod_name in ('snowdin_milestones', 'waterfall_milestones', 'hotland_milestones', 'newhome_milestones'):
+    for mod_name in ('snowdin_milestones', 'waterfall_milestones', 'hotland_milestones', 'endgame_milestones'):
         try:
             mod = __import__(mod_name)
             regs.append(mod.reached)
@@ -27,6 +27,19 @@ def _load_registries():
     return regs
 
 _REGS = _load_registries()
+
+def _total_ids():
+    n = 0
+    for mod_name in ('milestones', 'snowdin_milestones', 'waterfall_milestones',
+                     'hotland_milestones', 'endgame_milestones'):
+        try:
+            mod = __import__(mod_name)
+            n += len(getattr(mod, 'MILESTONE_IDS',
+                 getattr(mod, f"{mod_name.replace('_milestones','').upper()}_IDS",
+                 getattr(mod, 'IDS', []))))
+        except ImportError:
+            pass
+    return n or 1
 
 def reached(state):
     out = []
@@ -41,7 +54,15 @@ SEQF = RUN / '.eseq'
 HITF = RUN / '.hits'
 
 ipc = BridgeIPC()
-T0 = time.time()
+
+# wall_clock must survive across the many python -c calls that drive a run:
+# persist the start timestamp on first use.
+T0F = RUN / '.t0'
+try:
+    T0 = float(T0F.read_text())
+except Exception:
+    T0 = time.time()
+    T0F.write_text(str(T0))
 
 def _load(name, default):
     try: return json.loads((RUN / name).read_text())
@@ -77,7 +98,9 @@ def _log(action, state):
     for m in new:
         hits.add(m)
         print(f"*** milestone {m} @frame {state.get('frame')}")
-    (RUN / '.hits').write_text(json.dumps(sorted(hits)))
+    tmp = RUN / '.hits.tmp'
+    tmp.write_text(json.dumps(sorted(hits)))
+    tmp.replace(RUN / '.hits')  # atomic — a crashed reader never sees a partial set
     LOG.open('a').write(json.dumps({
         'step_t': round(time.time() - T0, 2), 'action': {k: (sorted(v) if isinstance(v, (set, frozenset)) else v) for k, v in action.items()},
         'why': WHY['why'],
@@ -99,6 +122,30 @@ def tap(keys, hold=4, settle=8, why=None):
     ipc.wait_frames(settle)
     state = st()
     _log({'tap': keys, 'hold': hold}, state)
+    return state
+
+_WATCH = ('room_name', 'px', 'py', 'msg', 'dialogue', 'choicer', 'choice',
+          'in_battle', 'battlegroup', 'interact', 'myfight')
+
+def _sig(state):
+    return tuple(state.get(k) for k in _WATCH)
+
+def tapv(keys, hold=4, settle=8, why=None, tries=3):
+    """Verified tap — injected presses drop ~50% of the time on grid menus,
+    so retry until any watched state field changes (or `tries` runs out)."""
+    if isinstance(keys, str): keys = [keys]
+    if why is not None: WHY['why'] = why
+    state = st()
+    before = _sig(state)
+    for attempt in range(tries):
+        s = ipc.send_keys({k: True for k in keys}); ipc.wait_ack(s)
+        ipc.wait_frames(hold)
+        s = ipc.send_keys({k: False for k in keys}); ipc.wait_ack(s)
+        ipc.wait_frames(settle)
+        state = st()
+        if _sig(state) != before:
+            break
+    _log({'tapv': keys, 'hold': hold, 'attempts': attempt + 1}, state)
     return state
 
 def hold(keys, frames, tag=None, why=None):
@@ -151,7 +198,7 @@ def finish():
         'milestones_hit': sorted(hits),
         'deaths': deaths, 'event_counts': dict(counts),
         'steps_unjustified': unjust,
-        'score': len(hits) / len(MILESTONE_IDS),
+        'score': len(hits) / _total_ids(),
     }
     (RUN / 'result.json').write_text(json.dumps(result, indent=2))
     print(json.dumps(result, indent=2))

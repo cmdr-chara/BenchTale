@@ -1,4 +1,4 @@
-# Design — undertale-bench
+# Design — benchtale
 
 ## Goal
 
@@ -60,7 +60,7 @@ Metrics per run: furthest milestone, wall-clock and frame counts per milestone, 
 
 ## Related work / positioning
 
-VideoGameBench (raw pixel input on DOS/GB titles), BALROG (NetHack/Crafter RL envs), lmgame-Bench (Gym API on arcade titles), TextQuests (Infocom). undertale-bench's differentiators: a modern narrative RPG where progress is flag/plot-driven rather than score-driven, hybrid text+bullet-hell action, and an engine-injected bridge that makes the evaluation reproducible and cheatable-by-nobody (state comes from the game, not OCR).
+VideoGameBench (raw pixel input on DOS/GB titles), BALROG (NetHack/Crafter RL envs), lmgame-Bench (Gym API on arcade titles), TextQuests (Infocom). benchtale's differentiators: a modern narrative RPG where progress is flag/plot-driven rather than score-driven, hybrid text+bullet-hell action, and an engine-injected bridge that makes the evaluation reproducible and cheatable-by-nobody (state comes from the game, not OCR).
 
 ## Repo boundaries
 

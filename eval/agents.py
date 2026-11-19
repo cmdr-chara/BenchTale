@@ -231,7 +231,61 @@ class VLMAgent(Agent):
         return action
 
 
-AGENTS = {"scripted": ScriptedConfirmAgent, "vlm": VLMAgent}
+# ---------------------------------------------------------- Command Code CLI
+
+class CmdCLiAgent(Agent):
+    """Uses the Command Code `cmd` CLI (headless `cmd -p`) as the decision
+    engine — e.g. deepseek-v4.1-flash through a Command Code subscription.
+    Text-only input, so run with --obs-mode state.
+
+    Env: COMMAND_CODE_API_KEY (user_... key), UBENCH_CC_MODEL (default
+    deepseek/deepseek-v4.1-flash), UBENCH_MEMORY."""
+
+    def __init__(self):
+        if not os.environ.get("COMMAND_CODE_API_KEY"):
+            raise SystemExit("CmdCLiAgent needs COMMAND_CODE_API_KEY")
+        self.model = os.environ.get("UBENCH_CC_MODEL", "deepseek/deepseek-v4.1-flash")
+        self.memory: list[dict] = []
+        self.memory_n = int(os.environ.get("UBENCH_MEMORY", "8"))
+        self.name = f"cmdcli-{self.model.split('/')[-1]}"
+        import shutil
+        self._node = shutil.which("node") or "node"
+        # npm shim is `cmd.cmd`; calling it bare collides with cmd.exe —
+        # invoke the real node entry point instead.
+        pkg = os.environ.get(
+            "UBENCH_CC_ENTRY",
+            "C:/hostedtoolcache/node/24.22.2/x64/node_modules/"
+            "command-code/dist/index.mjs")
+        self._entry = pkg
+
+    def act(self, obs: dict) -> dict:
+        import subprocess
+        prompt = {
+            "state": _prune_state(obs.get("state") or {}),
+            "recent": self.memory[-self.memory_n:],
+        }
+        q = (_SYSTEM + "\n\nCURRENT TURN\n" + json.dumps(prompt) +
+             "\n\nRespond with ONLY the JSON action object.")
+        argv = [self._node, self._entry, "-p", q, "-m", self.model,
+                "--max-turns", "2", "--skip-onboarding", "--no-auto-update"]
+        try:
+            r = subprocess.run(argv, capture_output=True, text=True, timeout=180)
+            text = r.stdout.strip()
+            if r.returncode != 0:
+                raise RuntimeError(f"cmd rc={r.returncode}: {r.stderr[:200]}")
+        except Exception as e:
+            action = {"keys": {}, "hold_frames": 15,
+                      "why": f"(cli error: {e!r:.120} — holding still)"}
+            self.memory.append(action)
+            return action
+        action = _sanitize_action(_extract_json(text))
+        self.memory.append({"keys": sorted(action["keys"]),
+                            "hold_frames": action["hold_frames"],
+                            "why": action["why"]})
+        return action
+
+
+AGENTS = {"scripted": ScriptedConfirmAgent, "vlm": VLMAgent, "cmd": CmdCLiAgent}
 
 
 def make_agent(name: str) -> Agent:

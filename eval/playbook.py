@@ -1,12 +1,13 @@
 """Interactive play helper: send keys, watch state, grab frames."""
 import sys, time, json
-sys.path.insert(0, 'C:/Users/Administrator/repos/undertale-bench/env')
+_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(_ROOT / 'env'))
 from undertale_bench.ipc import BridgeIPC
 from undertale_bench.window import find_window, grab
 from pathlib import Path
 
 ipc = BridgeIPC()
-SHOT = Path('C:/Users/Administrator/repos/undertale-bench/runs')
+SHOT = _ROOT / 'runs'
 SHOT.mkdir(exist_ok=True)
 
 def state():

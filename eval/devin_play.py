@@ -7,8 +7,9 @@ at the end, result.json.
 """
 import sys, json, time
 from pathlib import Path
-sys.path.insert(0, 'C:/Users/Administrator/repos/undertale-bench/env')
-sys.path.insert(0, 'C:/Users/Administrator/repos/undertale-bench/eval')
+_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(_ROOT / 'env'))
+sys.path.insert(0, str(_ROOT / 'eval'))
 from undertale_bench.ipc import BridgeIPC
 from undertale_bench.window import find_window, grab
 import os
@@ -47,7 +48,7 @@ def reached(state):
         out.extend(r(state))
     return out
 
-RUN = Path(os.environ.get('BENCH_RUN_DIR', 'C:/Users/Administrator/repos/undertale-bench/runs/devin_first'))
+RUN = Path(os.environ.get('BENCH_RUN_DIR', str(_ROOT / 'runs' / 'devin_first')))
 RUN.mkdir(parents=True, exist_ok=True)
 LOG = RUN / 'steps.jsonl'
 SEQF = RUN / '.eseq'

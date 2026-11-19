@@ -4,6 +4,8 @@ A benchmark where an AI model must finish **Undertale** — or at least the **Ru
 
 Unlike screenshot-and-keyboard harnesses, undertale-bench patches `data.win` with [UndertaleModTool CLI](https://github.com/UnderminersTeam/UndertaleModTool) to inject a bridge *inside* the game. Each frame the game writes structured state (room, position, HP, LV, EXP, plot, flags, dialogue text, battle info) to disk and reads the desired key state back — turning Undertale into a Gymnasium environment.
 
+![Real Undertale, Ruins entrance, driven by the bench bridge](docs/screens_ruins.png)
+
 ## Modes
 
 - **real-time** — the game runs normally; the agent must act fast enough (hard mode, includes bullet-hell dodging).
@@ -54,6 +56,8 @@ python eval/run_eval.py --agent vlm --mode lite --steps 2000 --out runs/gpt4o_ru
 ### First recorded run
 
 `deepseek-v4.1-flash` (effort=low, `--obs-mode state`, 400 steps, ~1.7h): **score 0.0** — failed at the name-entry screen. It navigated the letter grid correctly and typed a name, but never toggled the confirm highlight, burning all 400 steps in `room_intromenu`. UI-navigation failures count as benchmark results, not bugs — the transcript is in `runs/ds41_run4/steps.jsonl`.
+
+![The naming grid — the exact screen where the first run scored 0.0](docs/screens_namegrid.png)
 
 ## Legal
 

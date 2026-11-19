@@ -449,3 +449,15 @@ monologue writer -> "OH NO!" scrollaway -> mettafly -> battler bg80.
   non-goto entry to fully verify bg95 in room_battle).
 - undertale.ini Sans F >=3 fast-forwards the preamble (death counter).
 - kills counter does NOT increment for scripted kills (Asgore, NEO).
+
+## True pacifist gate (verified live)
+- flag[493]=10 + flag[7]=0 -> obj_slidingdoor spawns in room_fire_lab1 at
+  (880,40) plus a post-dates object layer (dogfoodbag, napstafridge,
+  undynetrash, mettwallhole, alphysconveyor, door_s_musfade(888,76),
+  npc_marker(890,130), readable_room5).
+- door_s_musfade(888,76) -> room_fire_labelevator; touch
+  obj_finalelevatorpanel(140,80) + z -> elevator ride (white fade) ->
+  room_truelab_elevatorinside. True Lab chain confirmed reachable in-engine.
+- Also confirmed live: the Sans judgement scene's murder branch and the
+  murder=0 branch both consume the trigger (plot->201); re-run requires
+  plot<201 BEFORE entering the room (Create_0 destroys it at plot>200).

@@ -483,3 +483,39 @@ monologue writer -> "OH NO!" scrollaway -> mettafly -> battler bg80.
   ping-pong = scripted 'but it refused'.
 - Menu-strip columns: FIGHT x~40, ACT x~193, ITEM x~353, MERCY x~500
   (soul_x); submenu soul_y 278-369; strip soul_y ~446; off-menu soul_x=-400.
+
+## Post-SAVE finale chain (all verified live)
+- SAVE phase (bg256, room 306): all 6 friends saved -> room 332
+  (sepia Asriel+Chara flashback) -> room 306 post-save phase (small
+  sprite, "I... I...", attacks continue) -> room 331 (child Asriel +
+  radial white souls release) -> room 236 room_castle_barrier aftermath:
+  all six friends + Frisk, scripted chat then FREE-ROAM friend talks.
+- Pair mechanics: canon pairs are Papyrus+Sans, Toriel+Asgore, Alphys+
+  Undyne. ONE correct act on one member can mark the WHOLE pair saved
+  (Talk on Toriel -> both Toriel+Asgore showed (Saved)). A pair with one
+  saved member fires the other alone. "From somewhere, you felt their
+  support..." = pick landed. List entries render "(Saved)" once done.
+- Toriel's acts: Talk, Hug, Mercy, Preference.
+- FIGHT always misses in the whole Asriel fight; deaths -> "but it refused".
+- Movement is LOCKED while any text writer is alive — the room-236 friend
+  talks re-trigger on z inside their interact radius, so wedging next to a
+  friend = repeat-line deadlock. Escape: advance text until box clears,
+  then move WITHOUT pressing z.
+- "resonating"/"called out" narrator captions are persistent non-blocking
+  text over a LIVE menu strip — pressing z on the strip acts immediately.
+
+## Castle walk-back (post-aftermath, verified live)
+- Room order back: 236 barrier -> S edge-walk -> 235 room_castle_throneroom
+  (320x600) -> south door (x~150,y=585, narrow bush gap; save star at
+  160,110 = "Throne Room") -> 232 room_castle_finalshoehorn (820x540)
+  -> doorB SW (140-180,520) -> 231 room_sanscorridor (1400x240, judgement
+  hall; doorA east 1220,90 -> 232 SE door; doorB west 140,90 -> 230)
+  -> 230 room_lastruins_corridor (2120x240, 10 story_engagers)
+  -> west door x=0 -> 229 basement4 -> 228 basement3 -> 227 -> 226
+  basement1 -> doorXmusicfade NORTH (basement stairs) -> 220 room_asghouse1
+  foyer -> doorB south (138-158,232) -> 219 room_castle_front.
+- Note: door objects in castle rooms are tile-quads at room edges; the
+  south door in 235 needs x~150 alignment (bushes flank the gap).
+- Elevator chain for walk-back: 216 room_castle_elevatorout (elevatordoor
+  80,90 + savepoint 420,150) -> elevator interior 215 room_fire_finalelevator
+  (obj_finalelevatorpanel 140,80).

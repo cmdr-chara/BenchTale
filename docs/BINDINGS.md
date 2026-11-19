@@ -361,3 +361,34 @@ monologue writer -> "OH NO!" scrollaway -> mettafly -> battler bg80.
   (180,520), doorXmusicfade (400,90).
 - Route flags: flag[452]/[453] = the two keys; flag[454]=1 = chain unlocked.
   flag[7] must be 0 for the musicfade doors (checked in their Alarm_2).
+
+## Post-judgement chain (verified live, kill-route)
+- finalshoehorn: savepoint (460,110). South-east doorAmusicfade (680,520) ->
+  room_castle_coffins1 (its two doors both return to shoehorn markers;
+  coffins1 is a side wing). doorXmusicfade (400,90) -> throneroom.
+- throneroom: savepoint (160,110), toriel/asgore thrones, obj_asgoremeet_event
+  (140,500). Triggering it latches control and runs the full "Howdy" scene;
+  ~40 z advances -> plot=206, battlegroup=100, Asgore exits north.
+  GOTCHA: the north doorA (120,95) does NOT transition by walking into it
+  after the scene (gate while scene resolves?) - warp into it fired the
+  room change to room_castle_prebarrier.
+- prebarrier: east-west corridor; asgore_prebarrier_event arms a second
+  dialogue at x~480 -> plot=207 then 208. savepoint (520,142). East exit
+  doorAmusicfade (610,138) needs deep overlap (walk at y~141 capped at 643;
+  warp 615,138 fired it).
+- room_castle_barrier: obj_barrierevent + obj_finalbarrier armed; the walk-up
+  scene runs Asgore's last monologue -> room_battle bg100.
+- Asgore fight: monsterhp ~3500. MERCY button is SHATTERED (his intro).
+  Menu stays up while soul_x==40 (parked soul, NOT -400; menu must be
+  detected via the visible UI, not soul sentinel). ATK boost via `set at <v>`
+  barely scales (heavily DF-capped ~45-90/hit); fight is long at any LV.
+  At ~588 hp he kneels: the choice UI = obj_asgore_lastcutscene +
+  obj_fakeheart — the soul moves FREELY with arrows; the choice fires on
+  OVERLAP of the button box then z. Confirm: land the heart on FIGHT/MERCY
+  box then z (heart speed ~45game-px/s; overshoot is easy).
+- Choosing FIGHT kills him -> scripted dust scene -> room_castle_exit.
+  kills counter did NOT increment (Asgore's scripted kill isn't a normal
+  kill) — check flag side-effects for the ending split instead.
+- Admin: new `set <global> <v>` (variable_global_set) + `get <global>`
+  (guarded by variable_global_exists — a missing name threw and killed the
+  cmd reader on the previous build).

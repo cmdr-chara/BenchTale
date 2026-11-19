@@ -155,6 +155,22 @@ if (file_exists(""bench_cmd.txt""))
                     var pv = real(string_copy(line, sp + 1, 8));
                     global.plot = pv; admin = k + "" "" + string(pv);
                 }
+                if (k == ""set"")
+                {
+                    var sr = string_copy(line, sp + 1, 60);
+                    var sps = string_pos("" "", sr);
+                    var gname = string_copy(sr, 1, sps - 1);
+                    var gval = real(string_copy(sr, sps + 1, 20));
+                    variable_global_set(gname, gval);
+                    admin = k + "" "" + gname + ""="" + string(gval);
+                }
+                if (k == ""get"")
+                {
+                    var gr = string_copy(line, sp + 1, 40);
+                    var gv2 = ""?"";
+                    if (variable_global_exists(gr)) gv2 = string(variable_global_get(gr));
+                    admin = k + "" "" + gr + ""="" + gv2;
+                }
                 if (k == ""speed"")
                 {
                     var sv = real(string_copy(line, sp + 1, 8));

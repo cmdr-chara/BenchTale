@@ -565,6 +565,30 @@ var stepCode = obj.EventHandlerFor(EventType.Step, EventSubtypeStep.Step, Data);
 
 var importGroup = new CodeImportGroup(Data) { MainThreadAction = MainThreadAction };
 importGroup.QueueAppend(stepCode, stepGml);
+
+// Patch gml_Script_control_update: fold keyboard_check_direct edges into
+// control_pressed/control_state. Simulated keyboard_key_press lands in the
+// direct channel but never in keyboard_check on this runtime, which left
+// every menu/dialog/name-entry advance dead for injected input.
+const string controlAppend = @"
+// undertale-bench: synthesize control edges from the direct channel
+var bd0 = keyboard_check_direct(ord(""Z"")) || keyboard_check_direct(vk_enter);
+var bd1 = keyboard_check_direct(ord(""X"")) || keyboard_check_direct(vk_shift);
+var bd2 = keyboard_check_direct(ord(""C"")) || keyboard_check_direct(vk_control);
+if (!variable_global_exists(""bench_pd0"")) { global.bench_pd0 = 0; global.bench_pd1 = 0; global.bench_pd2 = 0; }
+if (bd0 && !global.bench_pd0) global.control_pressed[0] = 1;
+if (bd1 && !global.bench_pd1) global.control_pressed[1] = 1;
+if (bd2 && !global.bench_pd2) global.control_pressed[2] = 1;
+global.control_state[0] = global.control_state[0] || bd0;
+global.control_state[1] = global.control_state[1] || bd1;
+global.control_state[2] = global.control_state[2] || bd2;
+global.bench_pd0 = bd0;
+global.bench_pd1 = bd1;
+global.bench_pd2 = bd2;
+";
+var cuCode = Data.Code.ByName("gml_Script_control_update");
+importGroup.QueueAppend(cuCode, controlAppend);
+
 importGroup.Import();
 
 // NOTE: do NOT patch obj_time keyboard_check_direct reads. On this runtime

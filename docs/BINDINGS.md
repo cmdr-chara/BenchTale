@@ -413,3 +413,18 @@ monologue writer -> "OH NO!" scrollaway -> mettafly -> battler bg80.
   + obj_readable_room1(140,180) + obj_solidsmall(140,140). Coffins did not
   produce dialog on z-inspect at LV1/kill-route plot (likely scenery or
   gated by a flag — retry on pacifist). Room verified reachable in-route.
+
+## Papyrus fight bg27 — PASSED live at LV1 (spare route)
+- Parked-soul sentinel is NOT -999/-400: in-box vs menu is best detected by
+  soul_y >= ~430 (menu strip) or soul_x == 40. In-box y stays <= ~380.
+- Papyrus bones DO export via `blt` (counts 1-24); blue-attack floor phase
+  puts soul at y~369 (gravity, arrows move horizontally + up jumps).
+- Turn loop: menu appears -> his text may overlay it (z to dismiss first!),
+  then MERCY>spare. Early spares are rejected until his attack script ends
+  ("special attack" gag + final wave); then text "Papyrus is sparing you"
+  -> MERCY>spare resolves: plot 100 -> post-fight scene (~60 z advances,
+  barrier speech) -> plot 101, flag[88]=1 (friendship/hang-out unlocked).
+- LV1 survival needed heal-assist (hits ~4/hit, hp floor ~8); a no-heal LV1
+  pass is feasible only with better dodging — but Papyrus captures at 0hp
+  (garage shed), never kills, so retries cost nothing.
+- Fight trigger: room_fogroom walk east past x~459 -> scene -> bg27.

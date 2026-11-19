@@ -392,3 +392,13 @@ monologue writer -> "OH NO!" scrollaway -> mettafly -> battler bg80.
 - Admin: new `set <global> <v>` (variable_global_set) + `get <global>`
   (guarded by variable_global_exists — a missing name threw and killed the
   cmd reader on the previous build).
+
+## Ending chain (verified live, kill-route)
+- castle_exit entry rewrites plot to 30 and whitefades into room_undertale_end
+  (Flowey monologue — long, ~100+ z advances across several scenes).
+- undertale_end -> room_flowey_regret -> room_introstory: the neutral ending
+  completes and the game loops back to the intro. Full kill-route traversal
+  confirmed playable end-to-end on the real game.
+- Bridge gotcha: cmd reader dies permanently if `get` hits a missing global
+  (fixed: variable_global_exists guard). Asgore fight end-state does not
+  increment `kills` — scripted kill is not a normal kill event.

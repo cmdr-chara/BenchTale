@@ -5,13 +5,14 @@ plot spine: 36 sans intro -> 37/40/43/47 papyrus scenes -> 41 doggo ->
 100 PAPYRUS FIGHT -> 101 town -> 104 waterfall.
 
 battlegroups: 23 doggo, 25 dogi, 26 greatdog, 27 papyrus, 135 glyde.
-flags: 45 toriel, 52 doggo, 53 dogi, 54 greatdog, 55 lesserdog,
-      57 snowdrake, 66-68 papyrus, 222-225 area kill markers,
-      5 = fun value.
+flags: 45 toriel, 52 doggo (1=killed), 53 dogi, 54 greatdog, 55 lesserdog,
+      57 snowdrake (2=killed), 67 papyrus killed, 68 befriended,
+      88 papyrus hangout (1-4), 203 snowdin kill counter (16=exhausted),
+      282 glyde, 5 = fun value.
 """
 from __future__ import annotations
 
-from milestones import _room, _room_in, _plot_ge, _flag, _has_item, _kills_ge
+from milestones import _room, _room_in, _plot_ge, _flag, _flag_ge, _has_item, _kills_ge
 
 
 def _battlegroup(st, v):
@@ -35,14 +36,25 @@ SNOWDIN_MILESTONES = [
 ]
 
 SNOWDIN_OPTIONAL = [
-    ("papyrus_spared",   "Papyrus spared (fight won, no kill)",     lambda s: _plot_ge(s, 100) and _flag(s, 68, 1), "needs_calibration"),
-    ("papyrus_killed",   "Papyrus killed",                          lambda s: _flag(s, 67, 1),   "needs_calibration"),
+    ("papyrus_spared",   "Papyrus spared & befriended (flag[88]>=1)", lambda s: _plot_ge(s, 100) and _flag_ge(s, 88, 1), "calibrated"),
+    ("papyrus_killed",   "Papyrus killed (flag[67]=1)",           lambda s: _flag(s, 67, 1),   "calibrated"),
     ("tough_glove",      "Tough Glove from Box Road dimensional box", lambda s: _has_item(s, 14), "calibrated"),
     ("nice_cream",       "Bought a Nice Cream",                     lambda s: _has_item(s, 17),  "calibrated"),
     ("snowman_piece",    "Took a Snowman Piece",                    lambda s: _has_item(s, 16),  "calibrated"),
     ("fried_snow",       "Fell for Sans's fried snow",              lambda s: _flag(s, 60, 1),   "needs_calibration"),
     ("glyde",            "Found secret boss Glyde (mysterious door)", lambda s: _battlegroup(s, 135) or _flag(s, 282, 1), "calibrated"),
-    ("genocide_snowdin", "Snowdin kill counter exhausted",          lambda s: _flag(s, 222, 1),  "needs_calibration"),
+    ("genocide_snowdin", "Snowdin kill counter exhausted (flag[203]>=16)", lambda s: _flag_ge(s, 203, 16), "calibrated"),
+    ("snowdrake_killed", "Snowdrake killed (flag[57]=2)",         lambda s: _flag(s, 57, 2),   "calibrated"),
+    ("doggo_killed",     "Doggo killed (flag[52]=1)",             lambda s: _flag(s, 52, 1),   "calibrated"),
+    ("dogi_killed",      "Dogamy & Dogaressa killed (flag[53]=1)", lambda s: _flag(s, 53, 1),  "calibrated"),
+    ("greatdog_killed",  "Greater Dog killed (flag[54]=1)",       lambda s: _flag(s, 54, 1),   "calibrated"),
+    ("lesserdog_killed", "Lesser Dog killed (flag[55]=1)",        lambda s: _flag(s, 55, 1),   "calibrated"),
+    ("sans_basement",    "Sans's workshop basement (silver key)", lambda s: _room(s, "room_tundra_sansbasement"), "calibrated"),
+    ("sans_room",        "Sans's bedroom easter egg",             lambda s: _room_in(s, "room_tundra_sansroom", "room_tundra_sansroom_dark"), "calibrated"),
+    ("papyrus_room",     "Papyrus's room / cardboard box",        lambda s: _room(s, "room_tundra_paproom"), "calibrated"),
+    ("inn_visited",      "Snowed Inn visited",                    lambda s: _room_in(s, "room_tundra_inn", "room_tundra_inn_2f"), "calibrated"),
+    ("librarby",         "Snowdin librarby",                      lambda s: _room(s, "room_tundra_library"), "calibrated"),
+    ("grillbys",         "Grillby's bar",                         lambda s: _room(s, "room_tundra_grillby"), "calibrated"),
 ]
 
 SNOWDIN_IDS = [m[0] for m in SNOWDIN_MILESTONES]

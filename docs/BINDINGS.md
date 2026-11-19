@@ -566,3 +566,20 @@ Flag suite: `flag 7 1` (genocide master), `flag 26 16` (murder lv), `flag 203 16
 - Scene chain: 231 -> room_battle **battlegroup 95** (Sans: "Should be burning in hell", KR meter in HUD) -> his opening attack kills LV1 Frisk -> room_gameover -> respawn in 231 -> scene re-arms -> battle again (loop while z is being tapped).
 - goto works for this room; con111 did NOT need a natural corridor entry.
 - story_engager freeze in room_lastruins_corridor (230): post-ending Flowey monologue cutscene locks mv=0/intr=1 and does NOT respond to z/x/enter -- `freeme` clears it, then east walk reaches px 2019. Room 230->231 door is the SE one (~1860-1900,220), easy to miss; goto 231 is the reliable arm.
+
+
+## Flag corrections + full murder ladder (decompile-verified)
+
+Corrections to earlier notes:
+- flag[397] = **Muffet killed** (spidertalkevent), NOT Mettaton NEO. Mettaton kill (EX or NEO) = flag[425].
+- flag[7] = **true-pacifist ending completed** (set by outsideworld_event, friendc_event, asriel_overworldanim) — NOT the genocide flag.
+- flag[8] = Undyne letter/friendship chain (set by undyne_lettercall, undynedate_afterward, undyne_friendc; also by mettaton_neo).
+- flag[27] = generic "a monster was destroyed" marker, set by every boss Destroy event; mrd16 requires flag[27]==0.
+- flag[81] = Shyren (1=killed, 2=other); flag[252] = Glad Dummy killed; flag[402] = Royal Guards event; flag[26] = cached murder level (KeyPress M debug sets 50).
+- flag[352] = Undyne boss trigger armed; flag[98] = Undyne form (1 normal / 2 Undying); flag[99] = fight phase counter; flag[351] = her HP value.
+- flag[57]: Snowdrake — 2=killed (not 1). Dog flags 52/53/54/55: 1=killed (2=other branch).
+- flag[88] = Papyrus relationship (1 post-fight, 2 date start, 3 door, 4 date done).
+
+scr_murderlv() ladder (verified): 202>=20 ruins -> 45==4 toriel -> 52==1 doggo -> 53==1 dogi -> 54==1 greatdog -> 57==2 snowdrake -> 203>=16 snowdin -> 67==1 papyrus -> 81==1 shyren -> 252==1 gladdummy -> 204>=18 waterfall -> 251==1 && 350==1 undying -> 402==1 royalguards -> 397==1 muffet -> 205>=40 hotland+core -> 425==1 && 27==0 mettaton -> mrd16.
+
+New milestone files: eval/waterfall_milestones.py (plot 104-122), eval/hotland_milestones.py (plot 122-199, incl CORE), eval/endgame_milestones.py (plot 199-999 + endings + classify_route()). Snowdin optional set fixed (genocide_snowdin now flag203>=16; added per-dog kill flags and town side rooms).

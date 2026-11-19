@@ -55,6 +55,21 @@ def _flag(st, i, v):
         return parts[i] == v
 
 
+def _flag_ge(st, i, v):
+    csv = st.get("flags_csv") or ""
+    parts = csv.rstrip(",").split(",")
+    if len(parts) <= i or not parts[i]:
+        return False
+    try:
+        return float(parts[i]) >= v
+    except (TypeError, ValueError):
+        return False
+
+
+def _kills(st):
+    return st.get("kills") or 0
+
+
 MILESTONES = [
     ("game_start",      "Named the fallen human, first playable room",  lambda s: _room(s, "room_area1"),           "calibrated"),
     ("flowey_done",     "Flowey encounter resolved",                    lambda s: _plot_ge(s, 1),                   "calibrated"),

@@ -55,6 +55,9 @@ SNOWDIN_OPTIONAL = [
     ("inn_visited",      "Snowed Inn visited",                    lambda s: _room_in(s, "room_tundra_inn", "room_tundra_inn_2f"), "calibrated"),
     ("librarby",         "Snowdin librarby",                      lambda s: _room(s, "room_tundra_library"), "calibrated"),
     ("grillbys",         "Grillby's bar",                         lambda s: _room(s, "room_tundra_grillby"), "calibrated"),
+    ("manly_bandanna",   "Manly Bandanna from the shop (item 15)", lambda s: _has_item(s, 15),  "calibrated"),
+    ("bisicle",          "Bisicle/Unisicle bought (items 19-20)",  lambda s: _has_item(s, 19) or _has_item(s, 20), "calibrated"),
+    ("cinnamon_bun",     "Cinnamon Bun from the inn (item 21)",    lambda s: _has_item(s, 21),  "calibrated"),
 ]
 
 SNOWDIN_IDS = [m[0] for m in SNOWDIN_MILESTONES]

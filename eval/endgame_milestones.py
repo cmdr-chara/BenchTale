@@ -58,6 +58,13 @@ ENDGAME_OPTIONAL = [
     # Judgement outcome
     ("sans_judged",      "Sans delivered a judgement (any branch)",      lambda s: _room(s, "room_sanscorridor") and _plot_ge(s, 201), "calibrated"),
     ("key_rooms",        "Asgore's house keys found (chain lock opened)", lambda s: _room(s, "room_asghouse3"), "needs_calibration"),
+    ("heart_locket",     "Heart Locket from Asgore's house (item 50)",    lambda s: _has_item(s, 50),  "calibrated"),
+    ("worn_dagger",      "Worn Dagger from Asgore's house (item 51)",     lambda s: _has_item(s, 51),  "calibrated"),
+    ("real_knife",       "The Real Knife (genocide, item 52)",            lambda s: _has_item(s, 52),  "calibrated"),
+    ("the_locket",       "The Locket (genocide, item 53)",                lambda s: _has_item(s, 53),  "calibrated"),
+    ("bad_memory",       "Bad Memory in the True Lab bed (item 54)",      lambda s: _has_item(s, 54),  "calibrated"),
+    ("last_dream",       "Last Dream used (item 55)",                     lambda s: _has_item(s, 55),  "calibrated"),
+    ("undynes_letter_item","Undyne's Letter carried (items 56-57)",       lambda s: _has_item(s, 56) or _has_item(s, 57), "calibrated"),
 ]
 
 ENDGAME_OPTIONAL_IDS = [m[0] for m in ENDGAME_OPTIONAL]

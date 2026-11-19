@@ -58,10 +58,17 @@ HOTLAND_OPTIONAL = [
     ("opera_stage",      "Opera/musical stage room",                     lambda s: _room(s, "room_fire_operatest"), "calibrated"),
     ("core_warrior",     "CORE warrior event (bg64/67/68)",              lambda s: _room(s, "room_fire_core_warrior"), "calibrated"),
     ("hotel_bed",        "MTT hotel bed / room-service knock room",      lambda s: _room(s, "room_fire_hotelbed"), "calibrated"),
-    ("stained_apron",    "Stained Apron found",                          lambda s: _has_item(s, 46),  "needs_calibration"),
-    ("burnt_pan",        "Burnt Pan found",                              lambda s: _has_item(s, 45),  "needs_calibration"),
-    ("glamburger",       "Bought a Glamburger at the resort",            lambda s: _has_item(s, 27),  "needs_calibration"),
-    ("mettaton_face_steak","Mettaton-shaped steak",                      lambda s: _has_item(s, 32),  "needs_calibration"),
+    ("stained_apron",    "Stained Apron found (item 46)",                lambda s: _has_item(s, 46),  "calibrated"),
+    ("burnt_pan",        "Burnt Pan found (item 47)",                    lambda s: _has_item(s, 47),  "calibrated"),
+    ("glamburger",       "Bought a Glamburger at the resort (item 40)",  lambda s: _has_item(s, 40),  "calibrated"),
+    ("mettaton_face_steak","Mettaton-shaped steak (item 61)",            lambda s: _has_item(s, 61),  "calibrated"),
+    ("legendary_hero",   "Legendary Hero bought (item 43)",              lambda s: _has_item(s, 43),  "calibrated"),
+    ("starfait",         "Starfait bought (item 42)",                    lambda s: _has_item(s, 42),  "calibrated"),
+    ("junk_food",        "Junk Food found (item 59)",                    lambda s: _has_item(s, 59),  "calibrated"),
+    ("cowboy_hat",       "Cowboy Hat from Bratty & Catty (item 48)",     lambda s: _has_item(s, 48),  "calibrated"),
+    ("empty_gun",        "Empty Gun from Bratty & Catty (item 49)",      lambda s: _has_item(s, 49),  "calibrated"),
+    ("mystery_key",      "Mystery Key bought (item 60)",                 lambda s: _has_item(s, 60),  "calibrated"),
+    ("hush_puppy",       "Hush Puppy bought (item 62)",                  lambda s: _has_item(s, 62),  "calibrated"),
 ]
 
 HOTLAND_OPTIONAL_IDS = [m[0] for m in HOTLAND_OPTIONAL]

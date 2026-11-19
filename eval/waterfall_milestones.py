@@ -62,8 +62,16 @@ WATERFALL_OPTIONAL = [
     ("statue_room",      "Umbrella statue / music box room",             lambda s: _room(s, "room_water_statue"), "calibrated"),
     ("nicecream_water",  "Nice Cream guy (Waterfall)",                   lambda s: _room(s, "room_water_nicecream"), "calibrated"),
     ("undyne_house",     "Undyne's house / yard",                        lambda s: _room_in(s, "room_water_undynehouse", "room_water_undyneyard"), "calibrated"),
-    ("tem_flake",        "Bought Tem Flakes",                            lambda s: _has_item(s, 33),  "needs_calibration"),
-    ("astronaut_food",   "Astronaut Food from the cooler",               lambda s: _has_item(s, 35),  "needs_calibration"),
+    ("tem_flake",        "Bought Tem Flakes (item 22)",                  lambda s: _has_item(s, 22),  "calibrated"),
+    ("astronaut_food",   "Astronaut Food from the cooler (item 35)",     lambda s: _has_item(s, 35),  "calibrated"),
+    ("quiche",           "Abandoned Quiche found (item 23)",             lambda s: _has_item(s, 23),  "calibrated"),
+    ("old_tutu",         "Old Tutu found behind the waterfall (item 24)", lambda s: _has_item(s, 24), "calibrated"),
+    ("ballet_shoes",     "Ballet Shoes found (item 25)",                 lambda s: _has_item(s, 25),  "calibrated"),
+    ("cloudy_glasses",   "Cloudy Glasses from Gerson (item 44)",         lambda s: _has_item(s, 44),  "calibrated"),
+    ("torn_notebook",    "Torn Notebook from Gerson (item 45)",          lambda s: _has_item(s, 45),  "calibrated"),
+    ("sea_tea",          "Sea Tea bought (item 41)",                     lambda s: _has_item(s, 41),  "calibrated"),
+    ("snail_pie",        "Snail Pie (item 63)",                          lambda s: _has_item(s, 63),  "calibrated"),
+    ("dog_residue",      "Dog Residue picked up (items 29-34)",          lambda s: any(_has_item(s, i) for i in range(29, 35)), "calibrated"),
 ]
 
 WATERFALL_OPTIONAL_IDS = [m[0] for m in WATERFALL_OPTIONAL]

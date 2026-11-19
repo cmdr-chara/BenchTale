@@ -1,8 +1,8 @@
-# benchtale
+# BenchTale
 
 A benchmark where an AI model must finish **Undertale** — or at least the **Ruins** — by playing the real game.
 
-Unlike screenshot-and-keyboard harnesses, benchtale patches `data.win` with [UndertaleModTool CLI](https://github.com/UnderminersTeam/UndertaleModTool) to inject a bridge *inside* the game. Each frame the game writes structured state (room, position, HP, LV, EXP, plot, flags, dialogue text, battle info) to disk and reads the desired key state back — turning Undertale into a Gymnasium environment.
+Unlike screenshot-and-keyboard harnesses, BenchTale patches `data.win` with [UndertaleModTool CLI](https://github.com/UnderminersTeam/UndertaleModTool) to inject a bridge *inside* the game. Each frame the game writes structured state (room, position, HP, LV, EXP, plot, flags, dialogue text, battle info) to disk and reads the desired key state back — turning Undertale into a Gymnasium environment.
 
 ![Real Undertale, Ruins entrance, driven by the bench bridge](docs/screens_ruins.png)
 

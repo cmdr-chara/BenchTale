@@ -461,3 +461,25 @@ monologue writer -> "OH NO!" scrollaway -> mettafly -> battler bg80.
 - Also confirmed live: the Sans judgement scene's murder branch and the
   murder=0 branch both consume the trigger (plot->201); re-run requires
   plot<201 BEFORE entering the room (Create_0 destroys it at plot>200).
+
+## Finale chain (verified live, true-pacifist branch)
+- CRITICAL flag-order rule: flag[493]>=12 (and plot) MUST be set BEFORE
+  entering room_castle_barrier — room-creation code arms the finale at
+  spawn. Setting them after entry leaves bg100 unarmed and wedges the room.
+- obj_barrierevent is persistent: consumed on first fire; a later goto into
+  the room finds it inert. Requires clean boot + real door entry.
+- Battle writers (typer-61/62: Asgore intro, friendscene bubbles) ignore
+  oskey z-taps — HELD z ~0.8-1.5s advances them. Overworld writers take taps.
+- obj_asgore_finalintro (bg100): special_end=1 iff flag[493]>=12 && murder==0
+  -> con=-100 -> obj_friendscene; else spear-brandish + mercy-shatter path.
+- obj_friendscene: Toriel arrives, all six friends gather, Flowey vines ->
+  room_asrielappears -> bg256 Asriel.
+- Asriel fight (bg256): FIGHT always misses; soul color shifts phases;
+  ACT becomes SAVE listing each friend (Saved/Papyrus/Toriel/Alphys/Sans/
+  Asgore). Lost Souls appear on stage PAIRED (Papyrus+Sans together);
+  ACT -> two 'Lost Soul' entries -> memory acts (Joke/Recipe/Puzzle/Insult
+  for the brothers; 'Joke' fired the skeleton-pun memory). Souls stand
+  silent until the right acts land; deaths -> room_gameover -> battle
+  ping-pong = scripted 'but it refused'.
+- Menu-strip columns: FIGHT x~40, ACT x~193, ITEM x~353, MERCY x~500
+  (soul_x); submenu soul_y 278-369; strip soul_y ~446; off-menu soul_x=-400.

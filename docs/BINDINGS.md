@@ -402,3 +402,14 @@ monologue writer -> "OH NO!" scrollaway -> mettafly -> battler bg80.
 - Bridge gotcha: cmd reader dies permanently if `get` hits a missing global
   (fixed: variable_global_exists guard). Asgore fight end-state does not
   increment `kills` — scripted kill is not a normal kill event.
+
+## Coffin rooms (verified live, corrected)
+- Topology: finalshoehorn SE doorAmusicfade(680,520) -> coffins1 (vertical
+  corridor). coffins1 NORTH doorBmusicfade(y=0) -> back to shoehorn(660,345).
+  coffins1 SOUTH doorA(y=520) -> room_castle_coffins2 (the 6-coffin room,
+  entered at its west markerA). coffins2 west doorB(80,120) -> back to
+  coffins1 markerB(140,480).
+- coffins2: 6 obj_coffin at y=140 x180-380 (soul colors OR/YL/GR/CY/BL/PR)
+  + obj_readable_room1(140,180) + obj_solidsmall(140,140). Coffins did not
+  produce dialog on z-inspect at LV1/kill-route plot (likely scenery or
+  gated by a flag — retry on pacifist). Room verified reachable in-route.

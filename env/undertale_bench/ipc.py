@@ -10,6 +10,7 @@ doubles as the IPC directory:
 """
 from __future__ import annotations
 
+import ctypes
 import json
 import os
 import time
@@ -22,6 +23,82 @@ def sandbox_dir() -> Path:
     return Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local" / "share")) / "UNDERTALE"
 
 
+_OS_VK = {"z": 0x5A, "x": 0x58, "c": 0x43, "enter": 0x0D, "up": 0x26,
+          "down": 0x28, "left": 0x25, "right": 0x27, "f4": 0x73,
+          "shift": 0x10, "ctrl": 0x11}
+
+
+def _game_foreground() -> bool:
+    try:
+        user32 = ctypes.windll.user32
+        buf = ctypes.create_unicode_buffer(256)
+        user32.GetWindowTextW(user32.GetForegroundWindow(), buf, 256)
+        return "UNDERTALE" in buf.value.upper()
+    except Exception:
+        return False
+
+
+def _os_tap(key: str, hold: float = 0.05) -> None:
+    """Real OS-level key event — registers on keyboard_check/pressed (the
+    buffered channel every menu reads), which the bridge's keyboard_key_press
+    sim never reaches on this runtime."""
+    vk = _OS_VK.get(key)
+    if vk is None:
+        return
+    try:
+        user32 = ctypes.windll.user32
+        user32.keybd_event(vk, 0, 0, 0)
+        time.sleep(hold)
+        user32.keybd_event(vk, 0, 2, 0)
+    except Exception:
+        pass
+
+
+_WNDENUM = ctypes.WINFUNCTYPE(ctypes.c_bool, ctypes.c_void_p, ctypes.c_void_p)
+
+
+def _game_hwnd() -> int:
+    user32 = ctypes.windll.user32
+    found: list[int] = []
+
+    def cb(h, _lp):
+        buf = ctypes.create_unicode_buffer(256)
+        user32.GetWindowTextW(h, buf, 256)
+        if "UNDERTALE" in buf.value.upper() and user32.IsWindowVisible(h):
+            found.append(h)
+        return True
+
+    user32.EnumWindows(_WNDENUM(cb), 0)
+    return found[0] if found else 0
+
+
+def _focus_game() -> bool:
+    """Steal foreground for the UNDERTALE window (AttachThreadInput trick)."""
+    try:
+        user32 = ctypes.windll.user32
+        k32 = ctypes.windll.kernel32
+        h = _game_hwnd()
+        if not h:
+            return False
+        fg = user32.GetForegroundWindow()
+        cur = k32.GetCurrentThreadId()
+        pid = ctypes.c_ulong()
+        fgt = user32.GetWindowThreadProcessId(fg, ctypes.byref(pid)) if fg else 0
+        tgt = user32.GetWindowThreadProcessId(h, ctypes.byref(pid))
+        if fgt:
+            user32.AttachThreadInput(cur, fgt, True)
+        user32.AttachThreadInput(cur, tgt, True)
+        user32.BringWindowToTop(h)
+        ok = user32.SetForegroundWindow(h)
+        user32.AttachThreadInput(cur, tgt, False)
+        if fgt:
+            user32.AttachThreadInput(cur, fgt, False)
+        time.sleep(0.25)
+        return bool(ok) or _game_foreground()
+    except Exception:
+        return False
+
+
 class BridgeIPC:
     def __init__(self, timeout: float = 30.0):
         d = sandbox_dir()
@@ -32,6 +109,7 @@ class BridgeIPC:
         self.timeout = timeout
         self._seq = self._recover_seq()
         self._last_state_frame = -1
+        self._down_keys: set[str] = set()
 
     def _recover_seq(self) -> int:
         """bench_seq persists in-game across processes — continue from last ack."""
@@ -66,6 +144,17 @@ class BridgeIPC:
                 time.sleep(0.01)
         else:
             raise TimeoutError("bench_cmd.txt locked by game")
+        # Menus/naming/choicer/dialogue read keyboard_check_pressed, which
+        # ignores the bridge's simulated presses. Fire one real OS tap per
+        # newly-pressed key so every menu callsite works like human input.
+        new_presses = {k for k, v in keys.items() if v} - self._down_keys
+        self._down_keys = {k for k, v in keys.items() if v}
+        if new_presses:
+            if not _game_foreground():
+                _focus_game()
+            if _game_foreground():
+                for k in sorted(new_presses):
+                    _os_tap(k)
         return self._seq
 
     def goto_room(self, room_name: str) -> int:
